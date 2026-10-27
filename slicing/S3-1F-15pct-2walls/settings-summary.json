@@ -1,0 +1,65 @@
+{
+  "slicer": "BambuStudio-02.08.02.61",
+  "sourceSTL": "01. DRAWERS/01. S Families/S3/Modules/S3 Module 1F.stl",
+  "orientation": "原始 STL 方向，自动排盘但不自动旋转",
+  "profiles": {
+    "machine": {
+      "name": "Bambu Lab P2S 0.4 nozzle",
+      "inheritance": [
+        "fdm_machine_common",
+        "fdm_bbl_3dp_001_common",
+        "Bambu Lab P2S 0.4 nozzle"
+      ],
+      "settings": {
+        "nozzle_diameter": [
+          "0.4"
+        ]
+      }
+    },
+    "process": {
+      "name": "0.20mm Standard @BBL P2S",
+      "inheritance": [
+        "fdm_process_common",
+        "fdm_process_single_common",
+        "fdm_process_single_0.20",
+        "0.20mm Standard @BBL P2S"
+      ],
+      "settings": {
+        "layer_height": "0.2",
+        "initial_layer_print_height": "0.2",
+        "sparse_infill_density": "15%",
+        "wall_loops": "2",
+        "sparse_infill_pattern": "grid",
+        "top_shell_layers": "5",
+        "top_shell_thickness": "1.0",
+        "bottom_shell_layers": "3",
+        "bottom_shell_thickness": "0",
+        "enable_support": "0",
+        "support_type": "tree(auto)",
+        "brim_width": "5"
+      }
+    },
+    "filament": {
+      "name": "Bambu PLA Basic @BBL P2S",
+      "inheritance": [
+        "fdm_filament_common",
+        "fdm_filament_pla",
+        "Bambu PLA Basic @base",
+        "Bambu PLA Basic @BBL P2S"
+      ],
+      "settings": {
+        "filament_density": [
+          "1.26"
+        ],
+        "filament_diameter": [
+          "1.75"
+        ],
+        "filament_flow_ratio": [
+          "0.98",
+          "0.98",
+          "0.98"
+        ]
+      }
+    }
+  }
+}

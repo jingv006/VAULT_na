@@ -1,0 +1,24 @@
+exports/
+tmp/
+__pycache__/
+*.pyc
+工作台预览.jpg
+层间插入预览.jpg
+slicing/**/work/
+slicing/**/runtime/
+耗材时间预览.jpg
+打印机适配预览.png
+kits/
+尺寸总览预览.png
+S3F1切片器配色验证.png
+型号外观预览.png
+
+# Local caches, machine state and generated print output
+.DS_Store
+.openai/
+.env
+.env.*
+!.env.example
+dist/preview-assets/
+*.gcode
+*.log

@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "name": "官方参考配色",
+  "slots": [
+    {"id": "light", "name": "浅灰 · 主体", "hex": "#D1D3D5", "material": "PLA", "reference": "说明手册 Important Notes 明确主色为 Bambu PLA 浅灰 10104；屏幕色值用于近似预览。"},
+    {"id": "dark", "name": "深灰 · 内件", "hex": "#454749", "material": "PLA", "reference": "按官方抽屉、翻盖箱爆炸图中的深色内件分配，未指定官方色号。"},
+    {"id": "orange", "name": "橙色 · 功能件", "hex": "#F58238", "material": "PLA", "reference": "按官方装配图中的弹簧、限位件、齿条和铰链轴等橙色零件分配；近似色。"},
+    {"id": "label", "name": "浅色 · 标签", "hex": "#F4F2EB", "material": "PLA", "reference": "按官方装配图中浅色标签分配；文字可在切片器另加。"}
+  ],
+  "roleSlots": {
+    "柜体": "light", "箱体": "light", "顶盖": "light", "面板": "light", "前面板": "light", "面板端盖": "light", "旋钮帽": "light", "翻盖": "light", "翻盖分件": "light", "翻盖连接件": "light", "网格收纳底板": "light", "网格收纳底板分件": "light", "导轨": "light",
+    "抽屉盒": "dark", "抽屉盒分件": "dark", "抽屉背板": "dark", "旋钮锁芯": "dark", "滑轨": "dark", "上铰链套件": "dark", "下铰链套件": "dark", "锁扣内件": "dark", "锁扣外件": "dark", "锁扣座": "dark", "锁扣插销套件": "dark", "密封隔板": "dark", "密封侧隔板": "dark", "密封中隔板": "dark", "双抽屉中间连接件": "dark",
+    "弹簧套件": "orange", "堆叠锁扣": "orange", "限位件": "orange", "加强齿条套件": "orange", "铰链轴套件": "orange",
+    "标签": "label", "箱体标签": "label", "锁扣标签": "label"
+  },
+  "sources": [
+    {"title": "官方说明 · 主色说明", "file": "01_Instructions Manual.pdf", "page": 1, "image": "references/official-notes.jpg"},
+    {"title": "官方抽屉部件爆炸图", "file": "01_Instructions Manual.pdf", "page": 11, "image": "references/drawer-parts.jpg"},
+    {"title": "官方翻盖箱部件爆炸图", "file": "01_Instructions Manual.pdf", "page": 12, "image": "references/sustainer-parts.jpg"},
+    {"title": "弹簧、旋钮配色与装配方向", "file": "02_Drawer Assembly.pdf", "page": 2, "image": "references/drawer-springs.jpg"},
+    {"title": "齿条、滑轨配色", "file": "02_Drawer Assembly.pdf", "page": 4, "image": "references/drawer-rails.jpg"},
+    {"title": "限位件与堆叠锁扣配色", "file": "02_Drawer Assembly.pdf", "page": 8, "image": "references/drawer-stoppers.jpg"}
+  ]
+}

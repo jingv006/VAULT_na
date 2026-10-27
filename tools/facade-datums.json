@@ -1,0 +1,312 @@
+{
+  "01. DRAWERS/01. S Families/Facades/S1F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -51.4524,
+        "z": -0.0002,
+        "radius": 4.9988
+      },
+      {
+        "x": 51.4484,
+        "z": -0.0003,
+        "radius": 4.9987
+      }
+    ],
+    "capQuantity": 1,
+    "asset": "preview-assets/28f45cd748a502e42a4dad62.bin",
+    "sourceBytes": 21912384,
+    "sourceMtimeNs": 1792069944000000000
+  },
+  "01. DRAWERS/01. S Families/Facades/S2F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -51.4526,
+        "z": -24.0004,
+        "radius": 4.9988
+      },
+      {
+        "x": 51.4482,
+        "z": -24.0003,
+        "radius": 4.9987
+      },
+      {
+        "x": -51.4526,
+        "z": 23.9996,
+        "radius": 4.9988
+      },
+      {
+        "x": 51.4481,
+        "z": 24.0,
+        "radius": 4.9988
+      }
+    ],
+    "capQuantity": 3,
+    "asset": "preview-assets/abd5cd757a84e2981c4e7b04.bin",
+    "sourceBytes": 10989684,
+    "sourceMtimeNs": 1792069951000000000
+  },
+  "01. DRAWERS/01. S Families/Facades/S4F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -51.4519,
+        "z": -72.0001,
+        "radius": 4.9989
+      },
+      {
+        "x": 51.4485,
+        "z": -72.0003,
+        "radius": 4.9988
+      },
+      {
+        "x": -51.4519,
+        "z": 71.9999,
+        "radius": 4.9989
+      },
+      {
+        "x": 51.4483,
+        "z": 72.0,
+        "radius": 4.9988
+      }
+    ],
+    "capQuantity": 3,
+    "asset": "preview-assets/942aa3000e33220243c7e4fa.bin",
+    "sourceBytes": 16175384,
+    "sourceMtimeNs": 1792069958000000000
+  },
+  "01. DRAWERS/02. M Families/Facades/M1F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -92.4604,
+        "z": -0.0003,
+        "radius": 4.9988
+      },
+      {
+        "x": -51.456,
+        "z": -0.0001,
+        "radius": 4.9989
+      },
+      {
+        "x": 51.4965,
+        "z": -0.0004,
+        "radius": 4.9988
+      },
+      {
+        "x": 92.4611,
+        "z": 0.0,
+        "radius": 4.9987
+      }
+    ],
+    "capQuantity": 3,
+    "asset": "preview-assets/bc3a4b5b4e95aaebb8eb1eb8.bin",
+    "sourceBytes": 14671684,
+    "sourceMtimeNs": 1792069975000000000
+  },
+  "01. DRAWERS/02. M Families/Facades/M2F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -92.4525,
+        "z": -24.0001,
+        "radius": 4.9994
+      },
+      {
+        "x": -51.4467,
+        "z": -24.0001,
+        "radius": 4.9994
+      },
+      {
+        "x": 51.5289,
+        "z": -24.0002,
+        "radius": 4.9994
+      },
+      {
+        "x": 92.4523,
+        "z": -24.0002,
+        "radius": 4.9996
+      },
+      {
+        "x": -92.4525,
+        "z": 23.9999,
+        "radius": 4.9994
+      },
+      {
+        "x": 92.4936,
+        "z": 23.9998,
+        "radius": 4.9995
+      }
+    ],
+    "capQuantity": 5,
+    "asset": "preview-assets/8cf9b39a01737d9617078ecb.bin",
+    "sourceBytes": 25954784,
+    "sourceMtimeNs": 1792069983000000000
+  },
+  "01. DRAWERS/02. M Families/Facades/M4F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -92.4525,
+        "z": -72.0001,
+        "radius": 4.9994
+      },
+      {
+        "x": -51.4467,
+        "z": -72.0001,
+        "radius": 4.9993
+      },
+      {
+        "x": 51.5289,
+        "z": -72.0002,
+        "radius": 4.9994
+      },
+      {
+        "x": 92.4526,
+        "z": -72.0002,
+        "radius": 4.9995
+      },
+      {
+        "x": -92.4525,
+        "z": 71.9999,
+        "radius": 4.9994
+      },
+      {
+        "x": 92.4936,
+        "z": 71.9998,
+        "radius": 4.9995
+      }
+    ],
+    "capQuantity": 5,
+    "asset": "preview-assets/c13f8c8d9f82b70413653e6b.bin",
+    "sourceBytes": 35565784,
+    "sourceMtimeNs": 1792069993000000000
+  },
+  "01. DRAWERS/03. L Families/Facades/L1F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -130.2603,
+        "z": -0.0003,
+        "radius": 4.9988
+      },
+      {
+        "x": -51.4556,
+        "z": -0.0003,
+        "radius": 4.9987
+      },
+      {
+        "x": 51.4968,
+        "z": -0.0004,
+        "radius": 4.9989
+      },
+      {
+        "x": 130.2616,
+        "z": -0.0,
+        "radius": 4.9988
+      }
+    ],
+    "capQuantity": 3,
+    "asset": "preview-assets/cc1600c214aa7325f8f5213a.bin",
+    "sourceBytes": 13210284,
+    "sourceMtimeNs": 1792070006000000000
+  },
+  "01. DRAWERS/03. L Families/Facades/L2F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -130.2603,
+        "z": -24.0003,
+        "radius": 4.9988
+      },
+      {
+        "x": -51.4557,
+        "z": -24.0003,
+        "radius": 4.9988
+      },
+      {
+        "x": 51.4967,
+        "z": -24.0004,
+        "radius": 4.9988
+      },
+      {
+        "x": 130.2601,
+        "z": -24.0001,
+        "radius": 4.9989
+      },
+      {
+        "x": -130.2603,
+        "z": 23.9997,
+        "radius": 4.9988
+      },
+      {
+        "x": 130.3012,
+        "z": 23.9996,
+        "radius": 4.9988
+      }
+    ],
+    "capQuantity": 5,
+    "asset": "preview-assets/e1282c9e1a09bd23c843363a.bin",
+    "sourceBytes": 16800384,
+    "sourceMtimeNs": 1792070015000000000
+  },
+  "01. DRAWERS/03. L Families/Facades/L4F (Turn On Supports).stl": {
+    "holes": [
+      {
+        "x": -130.2604,
+        "z": -72.0003,
+        "radius": 4.9988
+      },
+      {
+        "x": -51.4558,
+        "z": -72.0002,
+        "radius": 4.9988
+      },
+      {
+        "x": 51.4966,
+        "z": -72.0005,
+        "radius": 4.9988
+      },
+      {
+        "x": 130.2601,
+        "z": -72.0001,
+        "radius": 4.9989
+      },
+      {
+        "x": -130.2604,
+        "z": 71.9997,
+        "radius": 4.9988
+      },
+      {
+        "x": 130.3011,
+        "z": 71.9996,
+        "radius": 4.9989
+      }
+    ],
+    "capQuantity": 5,
+    "asset": "preview-assets/724aee529e885b6fd29e45fd.bin",
+    "sourceBytes": 25452584,
+    "sourceMtimeNs": 1792070023000000000
+  },
+  "01. DRAWERS/05. XL Families/XL Facade 1F.stl": {
+    "holes": [
+      {
+        "x": -169.6104,
+        "z": -0.0002,
+        "radius": 4.9989
+      },
+      {
+        "x": -51.4559,
+        "z": -0.0002,
+        "radius": 4.9989
+      },
+      {
+        "x": 51.4966,
+        "z": -0.0004,
+        "radius": 4.9989
+      },
+      {
+        "x": 169.6115,
+        "z": 0.0001,
+        "radius": 4.9988
+      }
+    ],
+    "capQuantity": 3,
+    "asset": "preview-assets/3fa81b4908c2cc35ea6cc27a.bin",
+    "sourceBytes": 15736284,
+    "sourceMtimeNs": 1792070048000000000
+  }
+}

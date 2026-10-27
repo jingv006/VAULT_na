@@ -1,0 +1,496 @@
+{
+  "date": "2026-10-24",
+  "catalog": {
+    "stlFiles": 733,
+    "integratedModules": 160,
+    "allReferencedFilesExist": true
+  },
+  "sample": {
+    "modules": 4,
+    "nominalWidthMM": 329.6,
+    "stackPitchHeightMM": 336,
+    "uniqueSTLFiles": 19,
+    "STLPrintCopies": 66,
+    "realZipBytes": 428424835,
+    "allSTLHashesMatch": true,
+    "includedPDFs": 4
+  },
+  "checks": [
+    "mixed-width support",
+    "collision detection",
+    "unsupported module detection",
+    "twin drawer component multiplication",
+    "invalid plan rejection",
+    "UTF-8 streaming ZIP CRC and content",
+    "real local ZIP source hashes",
+    "browser add/drag/coordinate editing",
+    "browser undo restore",
+    "600px and 1440px responsive preview"
+  ],
+  "limits": [
+    "No physical assembly, clearance, connector or load validation",
+    "Part quantities remain editable and should be checked against original assembly instructions"
+  ],
+  "hosting": "Local only, as explicitly requested by the user. No source upload or publication.",
+  "layerInsertion": {
+    "mixedHeightReorderCases": 60,
+    "checks": [
+      "top module inserted at bottom",
+      "module inserted in middle",
+      "source gap closes",
+      "independent columns stay in place",
+      "bridges propagate lifting",
+      "library drop inserts",
+      "preview does not mutate drag-start state",
+      "browser single undo and redo restore all positions",
+      "browser bottom and middle insertion remain collision-free"
+    ]
+  },
+  "H2DEstimates": {
+    "totalSTL": 733,
+    "recordsWithMassAndTime": 733,
+    "normalEnvelope": 608,
+    "estimateOnlyEnvelope": 125,
+    "automaticSupportExceptions": 4,
+    "unresolved": 0,
+    "completeAssemblyOptionCases": 370,
+    "browserChecks": [
+      "adding modules updates totals",
+      "hidden roofs removed from totals",
+      "manual quantities update totals",
+      "undo restores totals",
+      "support exceptions explicitly included",
+      "native ZIP contains actual statistics and extended CSV"
+    ],
+    "sampleGrams": 3369.6,
+    "sampleSeconds": 350706
+  },
+  "printerCompatibility": {
+    "date": "2026-10-24",
+    "geometryRecords": 733,
+    "translatedSTLNames": 733,
+    "machines": 24,
+    "printerModes": 27,
+    "assemblyCases": 370,
+    "checks": [
+      "Original STL vertex bounds; source files unchanged",
+      "Official sources for every printer mode",
+      "XY90 and opt-in six-axis permutations",
+      "XY edge margins 0/3/5mm",
+      "Missing dimensions never treated as printable",
+      "Per-file quantities, optional parts and exposed roofs",
+      "Browser small bed, reorientation and margin changes",
+      "Chinese search and native ZIP/CSV dimensions and estimates",
+      "600px and 1440px no horizontal page overflow"
+    ],
+    "exampleH2DSingleBlockedFiles": 3,
+    "nativeExportTest": {
+      "copies": 3,
+      "grams": 0.72,
+      "seconds": 1275,
+      "includesPrinterReport": true
+    },
+    "limitations": [
+      "Axis-aligned bounds, no search of arbitrary tilt angles",
+      "Nominal machine space does not include all slicer/toolhead keep-outs",
+      "Time and material estimates remain H2D baseline after switching fit-check printer"
+    ]
+  },
+  "kitOverview3MF": {
+    "date": "2026-10-26",
+    "integratedKits": 160,
+    "defaultPartRows": 2142,
+    "recipeOptionCases": 1580,
+    "organisedFolders": 160,
+    "drawerExample": {
+      "code": "S3F1",
+      "files": 13,
+      "copies": 16,
+      "plates": 4,
+      "bytes": 25092410
+    },
+    "sustainerExample": {
+      "code": "S3F1",
+      "files": 12,
+      "copies": 18,
+      "plates": 4
+    },
+    "checks": [
+      "Real browser search S3F1 and S3 1F",
+      "Options change parts and quantities",
+      "Drawer and sustainer 3MF downloaded successfully",
+      "Bambu Studio 2.8.2 import and native save-back retained17objects/4slots/4plates/15%infill/2walls",
+      "Source STL float32 vertices and winding preserved in sampled546334facet mesh",
+      "1580 recipe and non-overlap colour-plate checks",
+      "600px and1440px responsive layout",
+      "Add to stack produces5modules and undo restores4",
+      "Official reference images and documentation links"
+    ],
+    "limits": [
+      "First download generates local meshes; repeat requests use cache",
+      "3MF is an editable unsliced project, noG-code",
+      "Oversize parts retained at original scale and flagged",
+      "Additional support and packing change original single-file time estimates"
+    ]
+  },
+  "sizeMatchedPreviews": {
+    "date": "2026-10-26",
+    "modules": 160,
+    "renderCombinations": 880,
+    "checks": [
+      "Shared renderer for main art and thumbnails",
+      "Nominal width/depth/height projection",
+      "1F/2F/4F thumbnail heights48/96/192mm",
+      "Browser S3F2 main preview96mm",
+      "XL twin widths followS+M split",
+      "Grid top, bowl top, mounting top and no-top variants",
+      "Open sustainer lid and distinct flat/divider-interface/sealed interiors",
+      "Palette and selected options update thumbnails",
+      "Default browser layout has no horizontal page overflow"
+    ],
+    "screenshot": "型号外观预览.png"
+  },
+  "assembly3D": {
+    "date": "2026-10-26",
+    "source": "Original STL-derived display meshes; original print meshes unchanged",
+    "representativeModels": [
+      "d-S3-2",
+      "s-S3-2-standard",
+      "d-L3-2-twin",
+      "s-L3-2-sealed",
+      "d-S3-4"
+    ],
+    "controls": [
+      "Orbit, zoom and pan",
+      "Exploded view and opening sliders",
+      "Drawer group translation",
+      "Rear-pivot lid rotation",
+      "Automatic framing and fullscreen",
+      "Four freely editable material colours, synced to native 3MF"
+    ],
+    "checks": [
+      "Complete triangle index buffers and component byte boundaries",
+      "Exact recipe instance counts",
+      "Twin drawer left/right placement",
+      "Stationary cabinet during drawer opening",
+      "Lid front rises above cabinet",
+      "Per-role explosion transforms and colours",
+      "1580 existing recipe and native 3MF regression cases"
+    ],
+    "limits": [
+      "Role- and dimension-based display placement; no CAD mating constraints",
+      "Hinges, latches, sealed dividers and special split parts use approximate placement",
+      "First load converts and caches display meshes locally"
+    ]
+  },
+  "drawerAlignment": {
+    "date": "2026-10-26",
+    "measuredFacades": 10,
+    "drawerRecipesChecked": 70,
+    "representativeCases": 8,
+    "checks": [
+      "Source circular hole centres and radii before simplification",
+      "Outside cabinet ceiling contacts roof seat",
+      "Drawer floor clears measured inside floor by 0.2 mm",
+      "Facade back contacts box front",
+      "Key and cap coaxial; shaft end seats in cap cavity",
+      "Every uncovered facade hole has one concentric cap",
+      "Left/right spring boss alignment and runner orientation",
+      "Front geared racks run across width",
+      "S+M twins distribute unequal cap quantities",
+      "1580 recipe/packing and native 3MF regression cases",
+      "S3F2 native 3MF has 18 instances including 3 facade caps"
+    ],
+    "screenshot": "三维对齐修正.png",
+    "limits": [
+      "Display assembly, not a mechanical constraint solver",
+      "Sustainer hinge/latch and special split-part placements remain approximate"
+    ]
+  },
+  "sixPointRefinement": {
+    "date": "2026-10-26",
+    "checks": [
+      "Drawer explosion zero X/Z",
+      "Measured capsule ports and lateral-only stopper explosion",
+      "2/4/8 guides,slides,stoppers per1F/2F/4F",
+      "Cap rim contacts black shoulder; display-only stem occlusion",
+      "Historical latch placement superseded by latchSeatRefinement",
+      "Unit crease normals; sharp edges preserved",
+      "No mesh self-shadow stripes; ground shadow retained",
+      "8 representative cases and1580 native recipe regressions",
+      "S3F2 native3MF has24 copies"
+    ],
+    "printMeshes": "Source geometry unchanged",
+    "proofs": [
+      "details-refined.png",
+      "latch-refined.png"
+    ]
+  },
+  "knobLabelRefinement": {
+    "date": "2026-10-26",
+    "capOrientation": "RX180; bore end faces unlock mark",
+    "accent": {
+      "previewOnly": true,
+      "sourceSTL": null,
+      "includedInPrintBOM": false,
+      "colourSlot": "label"
+    },
+    "label": "Back contacts measured pocket bed; edge inset0.03mm; front recessed",
+    "checks": [
+      "8 representative assembly cases",
+      "10 facade pocket measurements",
+      "Accent unlock-side position and front rim contact",
+      "Label measured contact plane and bounds"
+    ],
+    "proof": "knob-label-refined.png"
+  },
+  "latchSeatRefinement": {
+    "date": "2026-10-26",
+    "placement": "Inside underside groove; 0.15 mm display clearance below groove ceiling and behind measured forward stop; pull ring rearward",
+    "checks": [
+      "8 representative assembly cases",
+      "S3F1 original STL groove/foot contact planes inspected",
+      "S3F1 browser underside assembly and explosion inspected",
+      "Cached S4 and S5 source stop planes match depth adjustment"
+    ],
+    "proof": "latch-seated.png",
+    "limits": "Display placement; no elastic snap-fit or mechanical interference simulation"
+  },
+  "roofControls": {
+    "date": "2026-10-26",
+    "choices": [
+      "Table",
+      "Grid",
+      "Bowl",
+      "Under Table Mount",
+      "none"
+    ],
+    "integration": "Shared kit options drive viewer, thumbnail, BOM, estimates and 3MF request; existing dropdown stays synchronized",
+    "checks": [
+      "Node syntax checks",
+      "8 assembly regression cases",
+      "Browser Grid selected and rendered; BOM and estimates updated",
+      "Browser Bowl rendered",
+      "Fullscreen sidebar remains usable",
+      "Browser Under Table Mount rendered",
+      "Browser none removes roof mesh"
+    ],
+    "proof": "roof-controls.png"
+  },
+  "roofSwitchAndOuterStops": {
+    "date": "2026-10-26",
+    "rootCause": "renderList bound model-selection click handlers to roof panel through global data-model query; bubbled roof clicks reselected previous model",
+    "fix": "Scope catalog bindings to kitList; separate roofModel dataset. Stopper lateral explosion 100 mm.",
+    "checks": [
+      "Same browser page: S3F1 -> S3F4 -> Grid, selected model unchanged; mesh and BOM changed",
+      "Same page: M3F4 -> Bowl rendered",
+      "Same page: S4F1 -> none -> Table, dropdown and BOM synchronized",
+      "8 fixture assembly regressions pass; exploded stopper entire mesh bounds exceed same-side runners by >8 mm"
+    ],
+    "proofs": [
+      "roof-switch-S3F4.png",
+      "stopper-outer-S3F4.png"
+    ]
+  },
+  "displaySwitch": {
+    "date": "2026-10-26",
+    "checks": [
+      "Browser: local S3F4 2D Grid roof and 192 mm height; switch to 3D and back preserves Grid",
+      "Browser: S3F1 real STL viewer completes loading; return to 2D works",
+      "Browser: static-only port 8766 has no model API, 2D S3F2 displays, Bowl roof and custom #62937A update, 3D disabled",
+      "Static server request log: no Three.js, assembly-viewer, STL, preview-job or mesh requests",
+      "JavaScript syntax checks; existing eight-fixture assembly regression passes"
+    ],
+    "proof": "display-switch.png"
+  },
+  "sustainerAlignment": {
+    "date": "2026-10-26",
+    "checks": [
+      "Eight representative sustainer fixtures: mounting holes, hinge/rod coaxiality, inner/outer lock pivots, real divider grooves, split cover seams, opening and explosion",
+      "All 90 sustainer recipes: central S/M lock, dual L/XL locks, XL facade and label selection",
+      "1580 JavaScript/Python recipe and packing cases; drawer and updated 12-copy S3F1 sustainer 3MF ZIP integrity, metadata, colours and profiles",
+      "Existing eight-fixture drawer/assembly regression passes",
+      "Browser: S3F2 closed/open; L3F2 sealed open; XL3F1 open and exploded"
+    ],
+    "sourceDifference": "Shared S/M leaf spacing 23 mm; M box 22.75 mm. Original meshes remain unscaled. L7 split covers retain their small original width difference.",
+    "proofs": [
+      "sustainer-aligned-closed.png",
+      "sustainer-aligned-open.png",
+      "sustainer-aligned-xl.png",
+      "sustainer-aligned-exploded.png"
+    ]
+  },
+  "sustainerLatchedPreview": {
+    "date": "2026-10-27",
+    "checks": [
+      "Eight sustainer fixtures: latched catch target, over-centre linkage, coaxial pivots while closed/releasing/open",
+      "Release latch before moving lid; returning to assembly restores the exact closed transforms",
+      "Existing eight-fixture assembly/drawer regression passes",
+      "Browser S3F2: initial latched preview, release and open, then return to latched assembly"
+    ],
+    "proofs": [
+      "sustainer-latched.png",
+      "sustainer-latch-released.png"
+    ],
+    "supersededBy": "sustainerGrooveLatchCorrection"
+  },
+  "sustainerGrooveLatchCorrection": {
+    "date": "2026-10-27",
+    "rootCause": "Holder leaf was incorrectly mounted outside the facade; the raised kinematic branch was mistaken for a locked pose.",
+    "fix": "Measured holder front mounting face now contacts the rear of the facade; closed lever presses down and hook toe seats in the recessed lid channel. Release swings the hook forward before lid opening.",
+    "checks": [
+      "Eight sustainer fixtures: rear holder seating, hook toe inside groove bounds and depth, closed lever angle < 0.12 rad, released hook forward clearance > 20 mm",
+      "Shared hinge/lock axes remain coaxial during closed/releasing/open motion; returning to assembly restores exact transforms",
+      "Existing eight-fixture drawer/assembly regression passes",
+      "Browser S3F2 closed, open/unlocked, return to closed and top groove detail verified"
+    ],
+    "proofs": [
+      "sustainer-groove-locked.png",
+      "sustainer-groove-detail.png",
+      "sustainer-groove-unlocked.png"
+    ]
+  },
+  "sustainerRoofControls": {
+    "date": "2026-10-27",
+    "choices": {
+      "depth3to5": [
+        "Lid"
+      ],
+      "depth6to7": [
+        "Split",
+        "Whole"
+      ]
+    },
+    "checks": [
+      "1832 JavaScript/Python recipe and packing cases passed",
+      "10 sustainer fixtures passed including S6F2 Whole and L7F4 sealed Whole; mounting, locking, hinges, opening and explosion checked",
+      "Real S6F2 Whole 3MF generated and ZIP, original meshes, selected lid paths, absent split connector, and 12-copy counts verified",
+      "Browser: S3F2 standard lid control visible; S6F2 Split/Whole round trip, 14/12 copies, dropdown, estimates, lid opening and 2D state synchronized",
+      "Default recipes retain original part order and normalized roof key for existing cache compatibility"
+    ],
+    "proof": "sustainer-roof-controls.png",
+    "localServer": "http://127.0.0.1:8765/",
+    "serverSession": 24101
+  },
+  "roofLoadingFeedback": {
+    "date": "2026-10-27",
+    "finding": "Live S6F2 Whole/Split replacement succeeded; closed shapes are similar and the previous viewer lacked a loaded-style label.",
+    "changes": [
+      "Loading/ready/error states show the actual roof style and cover piece count",
+      "Response roof source paths and quantities must match the selected recipe before assembly",
+      "Option snapshot, stale-response guard, same-choice retry and explicit redraw after successful assembly"
+    ],
+    "checks": [
+      "All catalog roof choices validate against their source recipes",
+      "Whole/Split replacement, delayed outdated response, mismatched response rejection and same-choice retry pass in tools/verify-roof-loading.mjs",
+      "Live browser S6F2 Whole/Split roundtrip: actual loaded label, file counts and exploded two-cover geometry verified"
+    ],
+    "proof": "sustainer-roof-loaded.png"
+  },
+  "unifiedNavigation": {
+    "date": "2026-10-27",
+    "changes": [
+      "Shared site-header.css and identical header markup with page-specific active indicator",
+      "Centered navigation, matching logo, spacing, height and local-library indicator",
+      "Workbench save status and import/save/package actions moved into project toolbar",
+      "Stable scrollbar gutter keeps navigation from shifting between pages"
+    ],
+    "checks": [
+      "Header markup matches except aria-current; original action IDs remain unique",
+      "Browser navigation in both directions works; local save status and original layout preserved",
+      "Same 1280px viewport: both headers 1265px wide, navigation x=524.2265625 y=0 width=216.546875 height=77",
+      "No desktop horizontal overflow observed"
+    ],
+    "proofs": [
+      "unified-nav-overview.png",
+      "unified-nav-workbench.png"
+    ]
+  },
+  "workbenchRoofLibraryAndCustomPrinter": {
+    "date": "2026-10-27",
+    "roofLibrary": {
+      "choices": 108,
+      "behaviour": [
+        "Filter by width/depth and search; styles use actual source recipes",
+        "Click installs on compatible selected or highest available module; drag targets a compatible module",
+        "Covered drawers and width/depth/kind mismatches rejected; existing automatic roof replaced",
+        "Spare roof adds original part quantities to extras only; BOM, estimates, CSV/ZIP entries updated",
+        "Sustainer Whole/Split options preserved through plan validation and reload"
+      ]
+    },
+    "customPrinter": {
+      "rangeMM": [
+        1,
+        10000
+      ],
+      "axes": [
+        "X",
+        "Y",
+        "Z"
+      ],
+      "persistence": "Existing local printer settings key",
+      "behaviour": [
+        "Editable name and printable volume; applied atomically with numeric validation",
+        "Same per-part fit, rotation, margin and reorientation logic as catalog printers",
+        "Canvas badges, BOM and selected printer report update; official source link hidden for user profile",
+        "H2D consumption/time basis unchanged"
+      ]
+    },
+    "checks": [
+      "tools/verify-workbench-options.mjs: 108 roof choices, target compatibility, replacement, spare quantities, export entries, estimates, plan import, custom profile persistence and fit",
+      "tools/verify-printers.mjs: 733 geometries, 27 official modes and 370 recipe variants pass",
+      "tools/verify.mjs: core recipe, layout, import and ZIP regression pass; obsolete 8-slide fixture expectation corrected to 18 from existing per-layer recipe",
+      "Browser: S3 tray roof replaces selected top; spare copy increases total from 214 to 215; undo restores original user plan",
+      "Browser: 500x500x500 profile clears blocked parts and survives reload; 0mm input rejected without applying; default 220x220x250 profile marks 6 blocked files",
+      "Browser: no console errors at initial load; both new control areas render"
+    ],
+    "proofs": [
+      "workbench-roof-library.png",
+      "workbench-custom-printer.png",
+      "workbench-new-options.png"
+    ]
+  },
+  "randomLayoutAndClearAll": {
+    "date": "2026-10-27",
+    "changes": [
+      "Explicit clear-all button in the upper-right canvas toolbar clears modules, spare parts and quantity overrides; undo restores them",
+      "Random-layout button above the lower-left canvas axis opens an anchored floating dialog",
+      "Configure S/M/L/XL bottom width, depth 3–7, total height 1–40F, and drawer/sustainer/mixed type",
+      "Generator fills supported horizontal bands to the exact envelope; generation replaces the layout, extras and overrides in one undo step",
+      "Menu supports Escape, close button, outside click, viewport clamping and keyboard focus"
+    ],
+    "checks": [
+      "720 generated plans cover all width/depth/type presets and varied F heights; exact envelope, no collisions/support/depth warnings, import and BOM pass",
+      "Thirty seeded L3/12F plans demonstrate varied layouts; invalid options rejected",
+      "108-roof/custom-printer regression passes",
+      "Browser: XL4/10F mixed layout generated 11 modules at exactly 480mm with layout check passing",
+      "Browser: clear-all reaches 0 modules/0 copies; first undo restores random plan, second undo exactly restores original 9-module/213-copy user plan",
+      "Browser: 0F rejected without changing plan; Escape closes menu"
+    ],
+    "proofs": [
+      "random-layout-menu.png",
+      "random-layout-result.png"
+    ]
+  },
+  "bulkDrawerAccessories": {
+    "date": "2026-10-27",
+    "controls": [
+      "Gridfinity 网格底板",
+      "加强齿条"
+    ],
+    "placement": "Canvas footer beneath the layout instructions",
+    "behaviour": [
+      "Apply/remove the selected accessory for all eligible current drawer modules in one undo step",
+      "Checked for all, mixed for partial, disabled when no eligible drawers; individual editor remains available",
+      "Flip boxes and manual spare-part entries unchanged; only affected accessory quantity overrides reset to recipe counts",
+      "BOM, estimates, export quantities, printer checks and autosave use existing item flags"
+    ],
+    "checks": [
+      "Expanded tools/verify-workbench-options.mjs passes: twin recipe quantities, mixed state, original snapshot integrity, flip/spare isolation and estimates",
+      "Browser: 9 drawers, Grid 0/9 to 9/9 and rail 1/9 to 9/9; copies 214 to 223 to 231; material 6.65kg to 6.91kg",
+      "Browser: selected S3F4 editor reflects both enabled; single grid deselection changes bulk control to 8/9 mixed",
+      "Three undo operations restore original 214 copies, material/time and checkbox states"
+    ],
+    "proof": "bulk-drawer-accessories.png"
+  }
+}

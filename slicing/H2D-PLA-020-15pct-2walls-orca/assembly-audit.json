@@ -1,0 +1,19 @@
+{
+  "assemblyCoverageCases": 370,
+  "allModulesCovered": true,
+  "sample": {
+    "grams": 3369.6,
+    "seconds": 350706,
+    "knownFiles": 19,
+    "knownCopies": 66,
+    "missingFiles": 0,
+    "missingCopies": 0,
+    "missing": [],
+    "supportCopies": 8,
+    "autoSupportCopies": 0,
+    "materialMismatchCopies": 0,
+    "estimateOnlyCopies": 2,
+    "warningCopies": 0,
+    "complete": true
+  }
+}
