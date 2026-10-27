@@ -4,7 +4,7 @@ import {printerBOM} from './printers.mjs';
 import {kitPreview} from './kit-preview.mjs?revision=flip-roof-load-2';
 import {KitDisplay} from './kit-display.mjs?revision=flip-roof-load-2';
 import {roofChoices,selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
-import {matchModelDirectory} from './local-models.mjs?revision=directory-picker-1';
+import {matchModelDirectory} from './local-models.mjs?revision=directory-tree-2';
 let viewer,selectedFiles=new Map(),fileURLs=new Map();
 function localFileURL(path){
  const file=selectedFiles.get(path);if(!file)return null;
@@ -21,7 +21,7 @@ function bindModelDirectory(){
    for(const url of fileURLs.values())URL.revokeObjectURL(url);fileURLs.clear();selectedFiles=result.files;
    $('chooseModelDirectory').textContent='重新选择模型目录';
    $('modelDirectoryStatus').querySelector('span').textContent=`已匹配 ${result.stls}/${result.totalSTLs} STL`;
-   $('modelDirectoryFeedback').textContent=`已连接 ${result.root}：匹配 ${result.stls}/${result.totalSTLs} 个 STL。${result.missing.length?'缺少或版本不匹配 '+result.missing.length+' 个模型，缺失的文件需重新选择正确目录。':'目录结构与已知文件大小匹配。'}文件仅在浏览器本地读取，不上传。`;
+   $('modelDirectoryFeedback').textContent=`已连接 ${result.root}：匹配 ${result.stls}/${result.totalSTLs} 个 STL。${result.missing.length?'内部文件树缺少 '+result.missing.length+' 个模型，缺失的文件需重新选择正确目录。':'内部文件树匹配完成，外层文件夹名称不限。'}${result.wrongSize.length?result.wrongSize.length+' 个文件大小与参考版本不同，已按路径匹配；切片估算仍用参考版本。':''}文件仅在浏览器本地读取，不上传。`;
    $('modelDirectoryFeedback').classList.remove('error');renderDetail();
   }catch(error){$('modelDirectoryFeedback').textContent=error.message;$('modelDirectoryFeedback').classList.add('error');}
   finally{$('modelDirectoryFeedback').hidden=false;e.target.value='';}

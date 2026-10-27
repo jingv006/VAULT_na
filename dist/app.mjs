@@ -5,7 +5,7 @@ import {fitPart,printerBOM,fitLabel,customPrinter} from './printers.mjs?revision
 import {roofLibrary,roofTarget,drawerAccessoryState,setDrawerAccessory} from './workbench-options.mjs?revision=bulk-accessories-1';
 import {roofChoices,selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
 import {randomLayout} from './random-layout.mjs?revision=random-layout-1';
-import {matchModelDirectory} from './local-models.mjs?revision=directory-picker-1';
+import {matchModelDirectory} from './local-models.mjs?revision=directory-tree-2';
 const $=id=>document.getElementById(id), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n.toFixed(1)).toLocaleString('zh-CN');
@@ -18,6 +18,7 @@ try{Object.assign(printerSettings,JSON.parse(localStorage.getItem(PRINTER_KEY)||
 try{printerSettings.custom=customPrinter(printerSettings.custom);}catch{printerSettings.custom=customPrinter({name:'我的打印机',volume:[220,220,250]});}
 const chosenPrinter=()=>printerSettings.id==='custom'?customPrinter(printerSettings.custom):printerData?.printers.find(p=>p.id===printerSettings.id)||printerData?.printers[0];
 function syncCustomPrinterInputs(){const p=customPrinter(printerSettings.custom);$('customPrinterForm').hidden=printerSettings.id!=='custom';$('customPrinterName').value=p.name;['X','Y','Z'].forEach((axis,i)=>$('customPrinter'+axis).value=p.volume[i]);$('customPrinterError').hidden=true;}
+const sourceBytes=(bom,copies)=>bom.parts.reduce((n,p)=>n+(linkedFiles.get(p.path)?.size??p.bytes)*(copies?p.qty:1),0);
 const dimensionsText=size=>size?size.map(n=>Number(n.toFixed(3)).toLocaleString('zh-CN')).join(' × ')+' mm':'尺寸待读取';
 const compatibility=bom=>printerBOM(bom,chosenPrinter(),geometry,printerSettings);
 function moduleBOM(a){return makeBOM({items:[{...a,roof:lookup[a.model].kind==='drawer'&&!isExposed(a,state.items,lookup)?'none':a.roof}],extras:[],overrides:state.overrides},cat);}
@@ -53,13 +54,13 @@ async function refreshEstimates(){
  if(!estimates?.summary?.complete)estimateTimer=setTimeout(refreshEstimates,15000);
 }
 
-let estimates=null,estimateTimer;
+let estimates=null,estimateTimer,stack3d,stack3dLoading,canvasMode='2d',previewAvailable=false;
 let roofEntries=[],cat,lookup,fileMeta,state,selected=null,local=false,linkedFiles=new Map(),kind='drawer',family='all',height='all',depth='3',view='front',dims=true,magnet=true,history=[],future=[],drag=null,box=[-120,-480,650,570],homeBox=[-120,-480,650,570],bomTab='parts',toastTimer,exporting=false;
 function toast(message){$('toast').textContent=message;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),4000);}
 function sample(){return {version:1,title:'我的收纳工作台',items:[{id:'base',model:'d-L3-4',x:0,y:0,color:COLORS[0],roof:'Table'},{id:'middle',model:'d-L3-1',x:0,y:192,color:COLORS[1],roof:'Table'},{id:'top-a',model:'d-S3-2',x:0,y:240,color:COLORS[0],roof:'Table'},{id:'top-b',model:'d-S3-2',x:164.8,y:240,color:COLORS[2],roof:'Table'}],extras:[],overrides:{}};}
 function checkpoint(){history.push(JSON.stringify(state));if(history.length>60)history.shift();future=[];}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));$('saveStatus').textContent='已自动保存至本机';}catch{$('saveStatus').textContent='浏览器存储不可用，请保存方案';}}
-function update({refit=false}={}){save();draw();renderInspector();syncBulkAccessories();renderStats();if(refit)fit();$('undo').disabled=!history.length;$('redo').disabled=!future.length;$('clear').disabled=!state.items.length&&!state.extras.length&&!Object.keys(state.overrides).length;}
+function update({refit=false}={}){save();draw();if(canvasMode==='3d')refreshStack3D();renderInspector();syncBulkAccessories();renderStats();if(refit)fit();$('undo').disabled=!history.length;$('redo').disabled=!future.length;$('clear').disabled=!state.items.length&&!state.extras.length&&!Object.keys(state.overrides).length;}
 function syncBulkAccessories(){
  for(const [id,key] of [['allDrawersGrid','grid'],['allDrawersRails','rails']]){
   const status=drawerAccessoryState(state.items,lookup,key),input=$(id);
@@ -81,6 +82,27 @@ function restore(str){state=JSON.parse(str);selected=null;$('projectTitle').valu
 function undo(){if(!history.length)return;future.push(JSON.stringify(state));restore(history.pop());}
 function redo(){if(!future.length)return;history.push(JSON.stringify(state));restore(future.pop());}
 function selectedItem(){return state.items.find(i=>i.id===selected);}
+async function refreshStack3D(){
+ if(canvasMode!=='3d')return;
+ try{
+  if(!stack3d){
+   stack3dLoading??=import('./stack-viewer.mjs?revision=stack-preview-1').catch(error=>{stack3dLoading=null;throw error;});
+   const {StackViewer}=await stack3dLoading;if(canvasMode!=='3d')return;
+   stack3d??=new StackViewer($('workbench3d'));
+  }
+  if(canvasMode==='3d'){stack3d.setActive(true);await stack3d.update(structuredClone(state.items),cat);}
+ }catch(error){setCanvasMode('2d');toast('三维显示暂不可用：'+error.message);}
+}
+function setCanvasMode(mode){
+ if(mode==='3d'&&!previewAvailable)return toast('请通过本机服务打开网页以预览真实三维模型');
+ canvasMode=mode;const is3d=mode==='3d';toggleRandomMenu(false);
+ $('canvasWrap').classList.toggle('is-3d',is3d);$('workbench3d').hidden=!is3d;
+ $('stackPreviewBtn').textContent=is3d?'返回二维视图':'3D 预览';$('stackPreviewBtn').setAttribute('aria-pressed',String(is3d));
+ $$('.view-tabs button').forEach(button=>button.disabled=is3d);
+ $('snapToggle').disabled=is3d;$('dimToggle').disabled=is3d;$('inspector').hidden=true;
+ if(is3d){if(!stack3d)$('workbench3d').textContent='正在准备三维组合预览…';refreshStack3D();}
+ else{stack3d?.setActive(false);draw();renderInspector();}
+}
 function mini(m){const w=m.width,h=Math.max(32,m.height),bw=120,bh=60,scale=Math.min((bw-15)/w,(bh-12)/h),rw=w*scale,rh=h*scale,x=(bw-rw)/2,y=(bh-rh)/2;let text='';const pieces=m.variant==='twin'?2:1;for(let k=0;k<pieces;k++){let sx=x+k*rw/pieces; text+=`<rect x="${sx+1}" y="${y+1}" width="${rw/pieces-2}" height="${rh-2}" rx="3" fill="${m.kind==='sustainer'?'#e2e0d4':'#dfe5d7'}" stroke="#829274" stroke-width=".8"/><rect x="${sx+3}" y="${y+3}" width="${rw/pieces-6}" height="${Math.max(4,rh-6)}" rx="2" fill="none" stroke="#a8b49c" stroke-width=".6"/>${m.kind==='sustainer'?`<rect x="${sx+rw/pieces/2-7}" y="${y+1}" width="14" height="6" rx="1" fill="#7d8b70"/>`:`<circle cx="${sx+rw/pieces/2}" cy="${y+rh-6}" r="1.8" fill="#839174"/>`}`;}
 return `<svg viewBox="0 0 ${bw} ${bh}" aria-hidden="true">${text}</svg>`;}
 function renderLibrary(){
@@ -194,6 +216,7 @@ function scene(exportMode=false){
 function draw(){if(!cat)return;$('canvas').setAttribute('viewBox',box.join(' '));$('canvas').innerHTML=scene();$('emptyCanvas').hidden=state.items.length>0;}
 function outsideView(){const b=bounds(state.items,lookup);return b.x-45<box[0]||b.x+b.width+30>box[0]+box[2]||-b.y-b.height-30<box[1]||65>box[1]+box[3];}
 function fit(){
+ if(canvasMode==='3d'){stack3d?.fitCamera();return;}
  const b=bounds(state.items,lookup),aspect=$('canvas').clientWidth/Math.max(1,$('canvas').clientHeight);
  const w=state.items.length?Math.max(b.width+170,500):650,h=state.items.length?Math.max((view==='top'?b.depth:b.height)+155,400):500;
  const vw=Math.max(w,h*aspect),vh=vw/aspect;
@@ -223,18 +246,18 @@ function exportSVG(){const b=bounds(state.items,lookup),w=Math.max(b.width+130,5
 function exportCSV(){const b=makeBOM(state,cat);return csv([['中文部件名称','原文件名','STL 打印份数','用途','原始路径','单份耗材g','单份时间秒','合计耗材g','合计时间秒','切片状态','说明','STL实际外形mm','检查打印机','打印机范围mm','尺寸检查'],...b.parts.map(p=>{const r=estimates?.records?.[p.path],known=r?.status==='ok';return [partName(p),p.name,p.qty,p.role,p.path,known?r.grams:'',known?r.seconds:'',known?(r.grams*p.qty).toFixed(2):'',known?r.seconds*p.qty:'',estimateState(p.path),[p.note,r?.estimateOnly?r.envelopeNote:'',r?.generatedSupports?r.supportNote:r?.needsSupport?'文件标注需支撑，当前未计额外支撑':'',r?.materialMismatch?'TPU 专用件按 PLA 估算':''].filter(Boolean).join('；'),dimensionsText(geometry?.records?.[p.path]?.size),chosenPrinter()?chosenPrinter().brand+' '+chosenPrinter().name:'',dimensionsText(chosenPrinter()?.volume),fitLabel(fitPart(p.path,chosenPrinter(),geometry,printerSettings).status)];})]);}
 function estimateSnapshot(bom){return {profile:estimates?.profile||null,updatedAt:estimates?.updatedAt||null,summary:estimateFor(bom),printerCompatibility:{checkedAt:printerData?.checkedAt,settings:{...printerSettings},result:compatibility(bom)},parts:bom.parts.map(p=>({path:p.path,qty:p.qty,estimate:estimates?.records?.[p.path]||null}))};}
 function showExport(){if(!state.items.length&&!state.extras.length)return toast('请先添加模块或配件');if(!$('exportDialog').open)$('exportDialog').showModal();renderExport();}
-function renderExport(){const b=makeBOM(state,cat),copies=$$('input[name=exportMode]').find(r=>r.checked).value==='copies',w=validate(state.items,lookup);$('exportSummary').textContent=`${b.parts.length} 种模型 · ${b.copies} 份 STL · ${estimateText(estimateFor(b))}`;$('exportSize').textContent='预计模型体积 '+size(copies?b.copyBytes:b.bytes);$('exportDocs').textContent=local?'本机版同时附带目录内原版 PDF 装配说明。':'已连接的原版 PDF 装配说明也会随包附带。';$('exportConnection').hidden=local||linkedFiles.size>0;$('exportWarning').hidden=!w.length;$('exportWarning').textContent=`当前有 ${w.length} 处布局提示。可以先在“打印清单 → 布局检查”核对，也可按当前布局导出。`;$('connectExport').hidden=local;$('startExport').disabled=exporting||!b.parts.length;$('connectExport').disabled=exporting;$('startExport').textContent=exporting?'正在打包…':'生成 ZIP ↓';$$('input[name=exportMode]').forEach(r=>r.disabled=exporting);}
+function renderExport(){const b=makeBOM(state,cat),copies=$$('input[name=exportMode]').find(r=>r.checked).value==='copies',w=validate(state.items,lookup);$('exportSummary').textContent=`${b.parts.length} 种模型 · ${b.copies} 份 STL · ${estimateText(estimateFor(b))}`;$('exportSize').textContent='预计模型体积 '+size(local?(copies?b.copyBytes:b.bytes):sourceBytes(b,copies));$('exportDocs').textContent=local?'本机版同时附带目录内原版 PDF 装配说明。':'已连接的原版 PDF 装配说明也会随包附带。';$('exportConnection').hidden=local||linkedFiles.size>0;$('exportWarning').hidden=!w.length;$('exportWarning').textContent=`当前有 ${w.length} 处布局提示。可以先在“打印清单 → 布局检查”核对，也可按当前布局导出。`;$('connectExport').hidden=local;$('startExport').disabled=exporting||!b.parts.length;$('connectExport').disabled=exporting;$('startExport').textContent=exporting?'正在打包…':'生成 ZIP ↓';$$('input[name=exportMode]').forEach(r=>r.disabled=exporting);}
 function progress(n,total,name){$('progressBar').style.width=Math.min(100,100*n/Math.max(1,total))+'%';$('progressText').textContent=`${size(n)} / ${size(total)} · ${name||''}`;}
 async function performExport(){
  if(exporting)return;const b=makeBOM(state,cat),copies=$$('input[name=exportMode]').find(r=>r.checked).value==='copies';
  if(!local&&!linkedFiles.size){$('folderInput').click();return;}
  // Validate every file before opening the save dialog or writing any bytes.
  const entries=packEntries(b,copies);
- if(!local){const missing=b.parts.filter(p=>!linkedFiles.has(p.path));if(missing.length){$('exportConnection').hidden=false;$('exportConnection').textContent=`所选文件夹缺少 ${missing.length} 个模型，例如 ${missing[0].path}。请选择完整的 ${cat.libraryName} 文件夹。`;return;}}
+ if(!local){const missing=b.parts.filter(p=>!linkedFiles.has(p.path));if(missing.length){$('exportConnection').hidden=false;$('exportConnection').textContent=`所选文件夹缺少 ${missing.length} 个模型，例如 ${missing[0].path}。请选择包含该相对路径的完整模型根目录；外层文件夹可任意命名，只需保留内部文件树。`;return;}}
  const snapshot=JSON.parse(JSON.stringify(state)),svg=exportSVG();let writable=null;
  try{
   if(!local&&window.showSaveFilePicker){const handle=await showSaveFilePicker({suggestedName:planName()+'.zip',types:[{description:'ZIP 压缩包',accept:{'application/zip':['.zip']}}]});writable=await handle.createWritable();}
-  const total=copies?b.copyBytes:b.bytes;
+  const total=local?(copies?b.copyBytes:b.bytes):sourceBytes(b,copies);
   if(!local&&!writable&&total>400e6)throw Error('当前浏览器不支持直接写入大文件。请使用 Chrome / Edge，或运行项目内“启动工作台.command”后打包。');
   exporting=true;renderExport();$('exportProgress').hidden=false;progress(0,total,'准备文件');
   if(local){
@@ -283,6 +306,7 @@ function bindRandomLayout(){
  window.addEventListener('scroll',()=>{if(!$('randomLayoutMenu').hidden)positionRandomMenu();},true);
 }
 function bind(){
+ $('stackPreviewBtn').disabled=!previewAvailable;$('stackPreviewBtn').title=previewAvailable?'按当前布局查看真实三维装配':'通过本机服务打开后可使用真实三维预览';$('stackPreviewBtn').onclick=()=>setCanvasMode(canvasMode==='2d'?'3d':'2d');
  bindRandomLayout();
  $('allDrawersGrid').onchange=e=>applyBulkAccessory('grid',e.target.checked);
  $('allDrawersRails').onchange=e=>applyBulkAccessory('rails',e.target.checked);
@@ -341,7 +365,7 @@ function bind(){
  $('importPlan').onclick=()=>$('planInput').click();$('planInput').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>5e6)throw Error('方案文件过大');const next=validatePlan(JSON.parse(await file.text()),cat);checkpoint();state=next;selected=null;$('projectTitle').value=state.title;update({refit:true});toast('方案已导入');}catch(err){toast('导入失败：'+err.message);}e.target.value='';};
  $('chooseModelDirectory').disabled=false;
  for(const id of ['connectLibrary','connectExport','chooseModelDirectory'])$(id).onclick=()=>$('folderInput').click();
- $('folderInput').onchange=e=>{try{if(!e.target.files.length)return;const result=matchModelDirectory(e.target.files,cat);linkedFiles=result.files;local=false;connectionUI();$('chooseModelDirectory').textContent='重新选择模型目录';$('modelDirectoryStatus').querySelector('span').textContent=`已匹配 ${result.stls}/${result.totalSTLs} STL`;if($('exportDialog').open)renderExport();toast(`已连接 ${result.root} · ${result.stls}/${result.totalSTLs} STL${result.missing.length?'，部分模型缺失或版本不匹配':''} · 仅本地读取`);}catch(error){toast(error.message);}finally{e.target.value='';}};
+ $('folderInput').onchange=e=>{try{if(!e.target.files.length)return;const result=matchModelDirectory(e.target.files,cat);linkedFiles=result.files;local=false;connectionUI();$('chooseModelDirectory').textContent='重新选择模型目录';$('modelDirectoryStatus').querySelector('span').textContent=`已匹配 ${result.stls}/${result.totalSTLs} STL`;if($('exportDialog').open)renderExport();toast(`已连接 ${result.root} · ${result.stls}/${result.totalSTLs} STL${result.missing.length?'，部分模型在内部文件树中未找到':''}${result.wrongSize.length?'，'+result.wrongSize.length+' 个文件大小与参考版本不同（仍可使用）':''} · 仅本地读取`);}catch(error){toast(error.message);}finally{e.target.value='';}};
  $('helpBtn').onclick=()=>$('helpDialog').showModal();$$('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());$$('dialog').forEach(d=>{d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});d.addEventListener('cancel',e=>{if(d.id==='exportDialog'&&exporting)e.preventDefault();});});
  new ResizeObserver(()=>{if(!drag)fit();}).observe($('canvasWrap'));
 }
@@ -349,7 +373,7 @@ async function init(){try{const r=await fetch('catalog.json?revision=aligned-hol
  try{const saved=localStorage.getItem(KEY);state=saved?validatePlan(JSON.parse(saved),cat):sample();}catch{state=sample();toast('上次方案无法读取，已载入示例');}
  $('projectTitle').value=state.title;
  try{const responses=await Promise.all([fetch('printers.json'),fetch('geometry.json')]);if(responses.some(r=>!r.ok))throw Error('打印机数据不可用');[printerData,geometry]=await Promise.all(responses.map(r=>r.json()));if(printerSettings.id!=='custom'&&!printerData.printers.some(p=>p.id===printerSettings.id))printerSettings.id='h2d';printerSettings.margin=[0,3,5].includes(printerSettings.margin)?printerSettings.margin:0;printerSettings.reorient=printerSettings.reorient===true;$('printerSelect').innerHTML=['拓竹','创想三维','纵维立方'].map(brand=>`<optgroup label="${brand}">${printerData.printers.filter(p=>p.brand===brand).map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</optgroup>`).join('')+'<optgroup label="自定义"><option value="custom">自定义打印机</option></optgroup>';$('printerSelect').value=printerSettings.id;syncCustomPrinterInputs();$('printerMargin').value=printerSettings.margin;$('printerReorient').checked=printerSettings.reorient;}catch(e){toast(e.message);}
- try{const res=await fetch('/api/status');if(res.ok){const status=await res.json();local=status.local&&status.ready;}}catch{}
+ try{const res=await fetch('/api/status');if(res.ok){const status=await res.json();local=status.local&&status.ready;previewAvailable=local;}}catch{}
  await refreshEstimates();bind();renderLibrary();connectionUI();update({refit:true});window.VaultWorkbench={getState:()=>structuredClone(state),getCatalog:()=>cat,getBOM:()=>makeBOM(state,cat),getWarnings:()=>validate(state.items,lookup),getEstimate:()=>estimateFor(makeBOM(state,cat)),getPrinterReport:()=>compatibility(makeBOM(state,cat)),getPrinters:()=>printerData,getGeometry:()=>geometry};
  const requestedKit=new URLSearchParams(location.search).get('kit');if(requestedKit&&lookup[requestedKit]){addModel(requestedKit);window.history.replaceState(null,'','workbench.html');}
  }catch(e){$('modelList').innerHTML='<div class="empty">'+esc(e.message)+'<br>请通过本地服务或在线地址打开工作台。</div>';toast(e.message);}}

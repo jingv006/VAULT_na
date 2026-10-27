@@ -5,11 +5,21 @@ import {sustainerDatums,alignedSustainerPart,sustainerLockPose,sustainerLockPlac
 import {drawerDatums,alignedDrawerPart} from './drawer-alignment.mjs?revision=outer-stoppers-1';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const cache=new Map();
-async function geometries(asset){
+export async function geometries(asset){
  if(cache.has(asset.url))return cache.get(asset.url);
  const r=await fetch(asset.url,{cache:'no-store'});if(!r.ok)throw Error('三维零件读取失败');const buffer=await r.arrayBuffer();
  const gs=asset.components.map(c=>{const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(new Float32Array(buffer,c.offset,c.vertices*3),3));g.setIndex(new T.BufferAttribute(new Uint32Array(buffer,c.indexOffset??c.offset+c.vertices*12,c.indices),1));if(c.normalOffset!==undefined)g.setAttribute('normal',new T.BufferAttribute(new Float32Array(buffer,c.normalOffset,c.vertices*3),3));else g.computeVertexNormals();return g;});
  cache.set(asset.url,gs);return gs;
+}
+export function pruneGeometries(active){
+ for(const [url,gs] of cache)if(!active.has(url)){for(const g of gs)g.dispose();cache.delete(url);}
+}
+// Share the measured assembly rules without creating a renderer for each box.
+export function createModuleAssembly(m,parts,assets,colours){
+ const module=Object.create(AssemblyViewer.prototype);
+ Object.assign(module,{root:new T.Group(),materials:[],moves:[],decorations:[],colours:{...colours},m,explode:0,open:0});
+ module.assemble(m,parts,assets);
+ return module;
 }
 export class AssemblyViewer{
  constructor(host,{onRoofChange}={}){

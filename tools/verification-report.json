@@ -508,6 +508,49 @@
       "JavaScript syntax checks for kits.mjs and app.mjs pass",
       "Browser: top button and mandatory structure note visible, directory dialog opens, no initial console errors or horizontal overflow observed"
     ],
-    "proof": "model-directory-picker.png"
+    "proof": "model-directory-picker.png",
+    "supersededBy": "directoryTreeCompatibility"
+  },
+  "wholeLayout3DPreview": {
+    "date": "2026-10-27",
+    "changes": [
+      "Bottom-right 3D preview / return-to-2D control switches the existing workbench canvas",
+      "One shared Three.js renderer uses the catalog preview lighting, background, ground shadows and orbit controls",
+      "Each selected module reuses measured original-STL assembly; placement preserves 2D X and F-height coordinates with shared cabinet front plane",
+      "Covered drawer roofs omitted; selected roof/grid/rack and module colours applied; spare print files are not floating assembled parts",
+      "Lazy module import, shared geometry, loading progress, retry, cancellation on return, empty-layout state, live changes and camera reset",
+      "2D editor and saved plan preserved; server availability controls real-3D entry"
+    ],
+    "checks": [
+      "tools/verify-stack-preview.mjs passes real single/twin drawer and whole-lid flip fixtures, world placement, F pitch, depth/front alignment, module colours, roof exposure and BOM correspondence",
+      "tools/verify-assembly.mjs eight real mesh fixtures pass",
+      "tools/verify-roof-loading.mjs asynchronous roof loading regression passes",
+      "Browser current plan: d-L6-4-twin at Z0, d-L6-1-twin at Z192, d-L6-4 at Z240; only top Table roof; three rendered modules",
+      "Browser rotate, return to 2D and re-enter: one renderer canvas, exact original 2D item IDs/transforms and 140 print copies/material/time preserved",
+      "Browser clear reaches empty scene, undo restores ready three-module scene; no console errors during switching"
+    ],
+    "proof": "stack-3d-preview.png"
+  },
+  "directoryTreeCompatibility": {
+    "date": "2026-10-27",
+    "findings": [
+      "Export error text still demanded a fixed library directory name",
+      "Screenshot sources use plural Guides/Slides while catalog uses singular Guide/Slide",
+      "Strict byte-size checks could reject an otherwise matching tree"
+    ],
+    "changes": [
+      "Ignore selected outer directory name; retain relative subtree path identity",
+      "Normalize Windows separators, Unicode, case and whitespace; explicit Guide(s)/Slide(s) aliases including XL",
+      "Prefer exact catalog path when aliases coexist; no cross-family basename fallback",
+      "Size differences accepted and reported, with actual local sizes used for ZIP preflight and streams",
+      "Both page notes and missing-model export message explicitly allow any root directory name"
+    ],
+    "checks": [
+      "tools/verify-local-models.mjs: five arbitrary root names, all 733 STL, Windows paths/case, screenshot aliases, size-independent matching and duplicate basename isolation passed",
+      "Plural-name/size-different streams packed to ZIP; two expected canonical entries, payload bytes and CRC verified with Python",
+      "app.mjs/kits.mjs syntax and git diff whitespace checks pass",
+      "Browser: updated note and enabled directory picker verified at app.mjs?revision=directory-tree-2"
+    ],
+    "proof": "directory-tree-matching.png"
   }
 }
