@@ -5,6 +5,7 @@ import {fitPart,printerBOM,fitLabel,customPrinter} from './printers.mjs?revision
 import {roofLibrary,roofTarget,drawerAccessoryState,setDrawerAccessory} from './workbench-options.mjs?revision=bulk-accessories-1';
 import {roofChoices,selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
 import {randomLayout} from './random-layout.mjs?revision=random-layout-1';
+import {matchModelDirectory} from './local-models.mjs?revision=directory-picker-1';
 const $=id=>document.getElementById(id), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n.toFixed(1)).toLocaleString('zh-CN');
@@ -338,8 +339,9 @@ function bind(){
  $('svgExport').onclick=()=>download(new Blob([exportSVG()],{type:'image/svg+xml'}),planName()+'.svg');
  $('savePlan').onclick=()=>download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),planName()+'.vault.json');
  $('importPlan').onclick=()=>$('planInput').click();$('planInput').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>5e6)throw Error('方案文件过大');const next=validatePlan(JSON.parse(await file.text()),cat);checkpoint();state=next;selected=null;$('projectTitle').value=state.title;update({refit:true});toast('方案已导入');}catch(err){toast('导入失败：'+err.message);}e.target.value='';};
- for(const id of ['connectLibrary','connectExport'])$(id).onclick=()=>$('folderInput').click();
- $('folderInput').onchange=e=>{const next=new Map();for(const f of e.target.files){const seg=f.webkitRelativePath.split('/');for(let n=0;n<seg.length;n++){const path=seg.slice(n).join('/').normalize('NFC');if(fileMeta[path]){next.set(path,f);break;}}}if(!next.size)return toast('文件夹中未找到匹配的 VAULT 模型文件');linkedFiles=next;local=false;connectionUI();if($('exportDialog').open)renderExport();toast(`已连接 ${next.size} 个文件，模型内容仅在本地读取`);};
+ $('chooseModelDirectory').disabled=false;
+ for(const id of ['connectLibrary','connectExport','chooseModelDirectory'])$(id).onclick=()=>$('folderInput').click();
+ $('folderInput').onchange=e=>{try{if(!e.target.files.length)return;const result=matchModelDirectory(e.target.files,cat);linkedFiles=result.files;local=false;connectionUI();$('chooseModelDirectory').textContent='重新选择模型目录';$('modelDirectoryStatus').querySelector('span').textContent=`已匹配 ${result.stls}/${result.totalSTLs} STL`;if($('exportDialog').open)renderExport();toast(`已连接 ${result.root} · ${result.stls}/${result.totalSTLs} STL${result.missing.length?'，部分模型缺失或版本不匹配':''} · 仅本地读取`);}catch(error){toast(error.message);}finally{e.target.value='';}};
  $('helpBtn').onclick=()=>$('helpDialog').showModal();$$('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());$$('dialog').forEach(d=>{d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});d.addEventListener('cancel',e=>{if(d.id==='exportDialog'&&exporting)e.preventDefault();});});
  new ResizeObserver(()=>{if(!drag)fit();}).observe($('canvasWrap'));
 }

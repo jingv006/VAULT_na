@@ -492,5 +492,22 @@
       "Three undo operations restore original 214 copies, material/time and checkbox states"
     ],
     "proof": "bulk-drawer-accessories.png"
+  },
+  "localModelDirectoryPicker": {
+    "date": "2026-10-27",
+    "changes": [
+      "Header button and always-visible original-directory-structure note on both pages",
+      "Browser-only file enumeration; original relative paths and byte sizes matched against catalog",
+      "Matched/partial/error feedback; zero-match or flattened/wrong-root selections rejected",
+      "Kit source STL links use local File blob URLs after selection; previous URLs revoked on reselection",
+      "Workbench header shares its existing folder connection and ZIP path, now with strict library-root matching",
+      "3MF/3D require the existing local service; selecting browser files does not pretend to enable server features"
+    ],
+    "checks": [
+      "tools/verify-local-models.mjs: full 733-STL library, preserved source paths, duplicate basenames, partial libraries, wrong sizes, flattened and parent-root rejection pass",
+      "JavaScript syntax checks for kits.mjs and app.mjs pass",
+      "Browser: top button and mandatory structure note visible, directory dialog opens, no initial console errors or horizontal overflow observed"
+    ],
+    "proof": "model-directory-picker.png"
   }
 }

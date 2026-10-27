@@ -4,7 +4,30 @@ import {printerBOM} from './printers.mjs';
 import {kitPreview} from './kit-preview.mjs?revision=flip-roof-load-2';
 import {KitDisplay} from './kit-display.mjs?revision=flip-roof-load-2';
 import {roofChoices,selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
-let viewer;
+import {matchModelDirectory} from './local-models.mjs?revision=directory-picker-1';
+let viewer,selectedFiles=new Map(),fileURLs=new Map();
+function localFileURL(path){
+ const file=selectedFiles.get(path);if(!file)return null;
+ if(!fileURLs.has(path))fileURLs.set(path,URL.createObjectURL(file));
+ return fileURLs.get(path);
+}
+function bindModelDirectory(){
+ $('chooseModelDirectory').disabled=false;
+ $('chooseModelDirectory').onclick=()=>$('modelDirectoryInput').click();
+ $('modelDirectoryInput').onchange=e=>{
+  try{
+   if(!e.target.files.length)return;
+   const result=matchModelDirectory(e.target.files,cat);
+   for(const url of fileURLs.values())URL.revokeObjectURL(url);fileURLs.clear();selectedFiles=result.files;
+   $('chooseModelDirectory').textContent='重新选择模型目录';
+   $('modelDirectoryStatus').querySelector('span').textContent=`已匹配 ${result.stls}/${result.totalSTLs} STL`;
+   $('modelDirectoryFeedback').textContent=`已连接 ${result.root}：匹配 ${result.stls}/${result.totalSTLs} 个 STL。${result.missing.length?'缺少或版本不匹配 '+result.missing.length+' 个模型，缺失的文件需重新选择正确目录。':'目录结构与已知文件大小匹配。'}文件仅在浏览器本地读取，不上传。`;
+   $('modelDirectoryFeedback').classList.remove('error');renderDetail();
+  }catch(error){$('modelDirectoryFeedback').textContent=error.message;$('modelDirectoryFeedback').classList.add('error');}
+  finally{$('modelDirectoryFeedback').hidden=false;e.target.value='';}
+ };
+}
+
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const code=m=>m.family+m.depth+'F'+m.floor;
 const mass=n=>n>=1000?(n/1000).toFixed(2)+' kg':n.toFixed(1)+' g';
@@ -31,13 +54,13 @@ function renderDetail(){
  $('kitFileCount').textContent=b.parts.length;$('kitCopyCount').textContent=b.copies;$('kitMass').textContent=mass(e.grams);$('kitTime').textContent=duration(e.seconds);
  $('roofOption').hidden=false;$('railsOption').hidden=m.kind!=='drawer';$('kitRoof').innerHTML=roofChoices(m).map(([value,title])=>`<option value="${esc(value)}">${esc(title)}</option>`).join('');$('kitRoof').value=options.roof;$('kitGrid').checked=options.grid;$('kitRails').checked=options.rails;
  $('partsCount').textContent=b.parts.length+' 种 STL · '+b.copies+' 份打印';
- $('kitParts').innerHTML=rows.map(p=>{const slot=palette.slots.find(s=>s.id===p.slot);return `<tr><td><strong>${esc(partName(p))}</strong><span class="part-role">${esc(p.role)}</span><details class="source-file"><summary>原始 STL 文件</summary><a href="/api/file/${encodeURIComponent(p.path)}" download>${esc(p.name)}</a><span>${esc(p.path)}</span></details>${p.note?'<small class="part-note">'+esc(p.note)+'</small>':''}</td><td class="qty-col">${p.qty}<small>份</small></td><td><span class="colour-tag"><i style="background:${colours[p.slot]}"></i>${esc(slot.name.split(' · ')[0])}</span></td><td class="unit-estimate">${mass(estimates.records[p.path].grams)}<small>${duration(estimates.records[p.path].seconds)}</small></td></tr>`;}).join('');
+ $('kitParts').innerHTML=rows.map(p=>{const slot=palette.slots.find(s=>s.id===p.slot);return `<tr><td><strong>${esc(partName(p))}</strong><span class="part-role">${esc(p.role)}</span><details class="source-file"><summary>原始 STL 文件</summary><a href="${localFileURL(p.path)||'/api/file/'+encodeURIComponent(p.path)}" download="${esc(p.name)}">${esc(p.name)}</a><span>${esc(p.path)}</span></details>${p.note?'<small class="part-note">'+esc(p.note)+'</small>':''}</td><td class="qty-col">${p.qty}<small>份</small></td><td><span class="colour-tag"><i style="background:${colours[p.slot]}"></i>${esc(slot.name.split(' · ')[0])}</span></td><td class="unit-estimate">${mass(estimates.records[p.path].grams)}<small>${duration(estimates.records[p.path].seconds)}</small></td></tr>`;}).join('');
  const totals=palette.slots.map(s=>({s,rows:rows.filter(p=>p.slot===s.id)})).filter(g=>g.rows.length);
  $('colourBreakdown').innerHTML=totals.map(({s,rows})=>`<div><i style="background:${colours[s.id]}"></i><span>${s.name}</span><strong>${rows.reduce((n,p)=>n+p.qty,0)}份</strong><small>${mass(rows.reduce((n,p)=>n+estimates.records[p.path].grams*p.qty,0))}</small></div>`).join('');
  $('kitWarnings').innerHTML=[fit.blockedFiles?`<p>尺寸核对：${fit.blockedFiles} 种零件按当前方向放不进 H2D 单喷嘴范围，3MF 中保留原尺寸并单独标记，需调整方向或拆分。</p>`:'',e.supportCopies?`<p>${e.supportCopies} 份零件标注需支撑，3MF 已预设开启；汇总用量仍是原 H2D 切片基准，额外支撑另计。</p>`:'',e.autoSupportCopies?`<p>${e.autoSupportCopies} 份特殊分件的基准统计已包含自动支撑。</p>`:''].join('');
  $('kitHardware').innerHTML=b.hardware.map(h=>`<span>${esc(h.name)} <b>× ${h.qty}</b></span>`).join('');
  $('download3mf').disabled=busy||!local;$('download3mf').textContent=busy?'正在整理 3MF…':'↓ 下载预分色 3MF';$('downloadQuick').disabled=busy||!local;
- $('downloadHint').textContent=local?'首次生成会整理真实网格，完成后自动下载；相同配方再次下载直接读取缓存。':'请通过本机启动文件打开网页，才能读取原始模型并生成 3MF。';
+ $('downloadHint').textContent=local?'首次生成会整理真实网格，完成后自动下载；相同配方再次下载直接读取缓存。':(selectedFiles.size?'已连接浏览器本地模型，原始 STL 可在文件清单下载；预分色 3MF 请使用本机启动服务生成。':'请通过本机启动文件打开网页以生成 3MF；也可在右上角选择原模型目录，直接读取原始 STL。');
  $('openWorkbench').href='workbench.html?kit='+encodeURIComponent(m.id);
 }
 function renderPalette(){
@@ -59,7 +82,8 @@ async function downloadKit(){
 }
 async function init(){
  try{[cat,estimates,palette,geometry,printers]=await Promise.all(['catalog.json','estimates.json','palette.json','geometry.json','printers.json'].map(async path=>{const r=await fetch(path+(path==='catalog.json'?'?revision=aligned-holes-2':''),{cache:'no-store'});if(!r.ok)throw Error(path+' 读取失败');return r.json();}));lookup=Object.fromEntries(cat.modules.map(m=>[m.id,m]));const hash=decodeURIComponent(location.hash.slice(1));if(lookup[hash])selected=hash;kind=model().kind;
-  colours=Object.fromEntries(palette.slots.map(s=>[s.id,s.hex]));try{const saved=JSON.parse(localStorage.getItem('vault-kit-colours')||'{}');for(const s of palette.slots)if(/^#[0-9A-F]{6}$/i.test(saved[s.id]||''))colours[s.id]=saved[s.id];}catch{}try{const r=await fetch('/api/status');if(r.ok)local=(await r.json()).local;}catch{}
+  colours=Object.fromEntries(palette.slots.map(s=>[s.id,s.hex]));try{const saved=JSON.parse(localStorage.getItem('vault-kit-colours')||'{}');for(const s of palette.slots)if(/^#[0-9A-F]{6}$/i.test(saved[s.id]||''))colours[s.id]=saved[s.id];}catch{}try{const r=await fetch('/api/status');if(r.ok){const status=await r.json();local=status.local&&status.ready;}}catch{}
+  bindModelDirectory();
   $('kitSearch').oninput=e=>{query=e.target.value;renderList();};
   for(const [id,key] of [['kitFamily','family'],['kitFloor','floor'],['kitDepth','depth']])$(id).onchange=e=>{if(key==='family')family=e.target.value;if(key==='floor')floor=e.target.value;if(key==='depth')depth=e.target.value;renderList();};
   document.querySelectorAll('[data-kind]').forEach(button=>{button.classList.toggle('active',button.dataset.kind===kind);button.onclick=()=>{kind=button.dataset.kind;document.querySelectorAll('[data-kind]').forEach(b=>b.classList.toggle('active',b===button));renderList();};});
