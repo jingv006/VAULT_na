@@ -7,8 +7,10 @@ import numpy as np
 from preview_landmarks import planes,circular_holes,runner_ports,label_pocket
 from preview_normals import crease_mesh
 from sustainer_landmarks import component_orientation,measured
+from drawer_orientation import is_xl_drawer,xl_orientation
 
 def orient(points,role,meta):
+    if is_xl_drawer(role,meta):return xl_orientation(points,meta['_faces'],role,meta['path'])
     # Printed cabinets/facades/lids use XY as width/height and Z as depth.
     if role in ['柜体','箱体','面板','前面板','顶盖','翻盖','翻盖分件']:
         width=meta.get('width',float(np.ptp(points,axis=0)[0]))

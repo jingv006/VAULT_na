@@ -1,14 +1,16 @@
+import {exteriorParts,exteriorSpec} from './exterior-preview.mjs?revision=exterior-1';
+import {previewPalette} from './palette-store.mjs?revision=shared-palette-1';
 import * as T from './vendor/three/three.module.js';
 import {OrbitControls} from './vendor/three/OrbitControls.js';
-import {createModuleAssembly,geometries,pruneGeometries} from './assembly-viewer.mjs?revision=stack-preview-1';
-import {verifyPreviewRoof} from './roof-options.mjs?revision=flip-roof-load-2';
+import {createModuleAssembly,geometries,pruneGeometries} from './assembly-viewer.mjs?revision=xl-drawers-1';
+import {verifyPreviewRoof} from './roof-options.mjs?revision=exterior-1';
 import {stackLayout,stackModulePosition} from './stack-layout.mjs?revision=stack-preview-1';
 
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 export class StackViewer{
  constructor(host){
   this.host=host;this.token=0;this.key='';this.modules=[];this.jobs=new Map();this.active=false;this.dirty=true;
-  host.innerHTML=`<div class="stack-scene-top"><div><strong>三维组合预览</strong><span class="stack-scene-summary" role="status"></span></div><button class="stack-camera-reset" type="button">复位视角 ↺</button></div><div class="stack-scene-status" role="status">正在准备真实模型…</div><span class="stack-scene-gesture">拖动旋转 · 滚轮缩放 · 右键平移</span><span class="stack-scene-caption">按当前布局装配 · 备用件仅计入打印清单</span>`;
+  host.innerHTML=`<div class="stack-scene-top"><div><strong>三维组合预览</strong><span class="stack-scene-summary" role="status"></span></div><button class="stack-camera-reset" type="button">复位视角 ↺</button></div><div class="stack-scene-status" role="status">正在准备真实模型…</div><span class="stack-scene-gesture">拖动旋转 · 滚轮缩放 · 右键平移</span><span class="stack-scene-caption">外观轻量预览 · 内部零件与备用件计入打印清单</span>`;
   this.status=host.querySelector('.stack-scene-status');this.summary=host.querySelector('.stack-scene-summary');
   this.renderer=new T.WebGLRenderer({antialias:true,alpha:true});this.renderer.setPixelRatio(Math.min(devicePixelRatio,2));this.renderer.outputColorSpace=T.SRGBColorSpace;this.renderer.localClippingEnabled=true;
   this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=T.PCFSoftShadowMap;
@@ -34,7 +36,7 @@ export class StackViewer{
  size(){const {width,height}=this.host.getBoundingClientRect();if(!width||!height)return;this.renderer.setSize(width,height);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();this.dirty=true;}
  clear(){for(const module of this.modules)module.clear();this.modules=[];this.root.clear();}
  async preview(entry,token){
-  const spec={model:entry.model.id,...entry.options},key=JSON.stringify(spec);
+  const spec=exteriorSpec(entry),key=JSON.stringify(spec);
   if(this.jobs.has(key))return this.jobs.get(key);
   let response=await fetch('/api/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(spec)});
   let job=await response.json();if(!response.ok)throw Error(job.error||'本机模型服务暂不可用');
@@ -44,25 +46,32 @@ export class StackViewer{
    this.status.textContent=`准备 ${entry.model.family+entry.model.depth+'F'+entry.model.floor} · ${job.done}/${job.total} 个零件`;
    await pause(700);response=await fetch('/api/preview-job/'+job.id,{cache:'no-store'});job=await response.json();if(!response.ok)throw Error(job.error||'模型进度读取失败');
   }
-  verifyPreviewRoof(entry.model,entry.options.roof,job.data.parts);this.jobs.set(key,job.data.parts);return job.data.parts;
+  const parts=exteriorParts(job.data.parts);verifyPreviewRoof(entry.model,entry.options.roof,parts,{exterior:true});this.jobs.set(key,parts);return parts;
  }
- async update(items,catalog){
-  const entries=stackLayout(items,catalog),key=JSON.stringify(entries.map(e=>[e.id,e.model.id,e.x,e.z,e.colour,e.options]));
-  if(key===this.key)return;this.key=key;this.last={items:structuredClone(items),catalog};const token=++this.token;
+ paintModules(){
+  for(const module of this.modules){const colours=this.colourMap?.get(module.root.userData.id);if(colours)module.paint(colours);}
+  this.host.dataset.colourMode=this.appearance?.mode||'pastel';
+  this.host.dataset.colours=JSON.stringify(this.modules.map(module=>({id:module.root.userData.id,...module.colours})));
+  this.dirty=true;
+ }
+ async update(items,catalog,appearance={}){
+  const entries=stackLayout(items,catalog),key=JSON.stringify(entries.map(e=>[e.id,e.model.id,e.x,e.z,e.options.roof]));
+  this.appearance=structuredClone(appearance);this.colourMap=new Map(items.map(item=>[item.id,previewPalette(item,appearance)]));this.last={items:structuredClone(items),catalog,appearance:this.appearance};this.paintModules();
+  if(key===this.key)return;this.key=key;const token=++this.token;
   this.host.dataset.previewState='loading';this.host.dataset.moduleCount='0';this.status.hidden=false;this.status.replaceChildren();this.status.textContent='正在按当前布局装配真实模型…';this.root.visible=false;this.dirty=true;
-  if(!entries.length){this.clear();this.status.textContent='从左侧添加模块后，可在这里查看三维组合。';this.summary.textContent='暂无模块';this.host.dataset.previewState='empty';return;}
+  if(!entries.length){this.clear();this.paintModules();this.host.dataset.layout='[]';this.host.dataset.loadedRoles='[]';this.host.dataset.meshCount='0';this.host.dataset.detail='exterior';this.status.textContent='从左侧添加模块后，可在这里查看三维组合。';this.summary.textContent='暂无模块';this.host.dataset.previewState='empty';return;}
   const assembled=[];
   try{
-   const palettes={light:'#D1D3D5',dark:'#454749',orange:'#F58238',label:'#F4F2EB'};
    const loaded=new Map(),activeURLs=new Set();
    for(let index=0;index<entries.length;index++){
     if(token!==this.token)break;const entry=entries[index];
     this.status.textContent=`装配 ${index+1}/${entries.length} · ${entry.model.family+entry.model.depth+'F'+entry.model.floor}`;
-    const parts=await this.preview(entry,token);if(!parts||token!==this.token)break;
+    const response=await this.preview(entry,token);if(!response||token!==this.token)break;
+    const parts=exteriorParts(response);
     const assets=[];
     for(const part of parts){activeURLs.add(part.asset.url);if(!loaded.has(part.asset.url))loaded.set(part.asset.url,geometries(part.asset));assets.push(await loaded.get(part.asset.url));if(token!==this.token)break;}
     if(token!==this.token)break;
-    const module=createModuleAssembly(entry.model,parts,assets,{...palettes,light:entry.colour||palettes.light});
+    const module=createModuleAssembly(entry.model,parts,assets,this.colourMap.get(entry.id));
     const body=parts.find(p=>['柜体','箱体'].includes(p.role));module.root.position.set(...stackModulePosition(entry,body.asset.size[1]));module.root.userData={id:entry.id,model:entry.model.id,roof:entry.options.roof};
     // Per-module clipping planes use world coordinates in the combined scene.
     for(const clip of module.keyClips)clip.plane.constant+=module.root.position.y;
@@ -70,14 +79,16 @@ export class StackViewer{
    }
    if(token!==this.token){for(const module of assembled)module.clear();return;}
    this.clear();this.modules=assembled;for(const module of assembled)this.root.add(module.root);
-   pruneGeometries(activeURLs);this.root.visible=true;this.status.hidden=true;this.host.dataset.previewState='ready';this.host.dataset.moduleCount=String(assembled.length);
+   this.paintModules();pruneGeometries(activeURLs);this.root.visible=true;this.status.hidden=true;this.host.dataset.previewState='ready';this.host.dataset.moduleCount=String(assembled.length);this.host.dataset.detail='exterior';
+   this.host.dataset.loadedRoles=JSON.stringify([...new Set(assembled.flatMap(module=>module.moves.map(move=>move.mesh.userData.role)))]);
+   this.host.dataset.meshCount=String(assembled.reduce((count,module)=>count+module.moves.length,0));
    this.host.dataset.layout=JSON.stringify(assembled.map(module=>({id:module.root.userData.id,model:module.m.id,position:module.root.position.toArray(),roof:module.root.userData.roof})));
-   this.summary.textContent=`${assembled.length} 个模块 · 顶盖、网格与齿条随当前选择`;
+   this.summary.textContent=`${assembled.length} 个模块 · 仅加载外观零件`;
    this.fitCamera(!this.hasView);this.hasView=true;this.dirty=true;
   }catch(error){
    for(const module of assembled)module.clear();if(token!==this.token)return;this.key='';this.host.dataset.previewState='error';
    this.status.textContent='三维预览未载入：'+error.message;
-   const retry=document.createElement('button');retry.type='button';retry.textContent='重试';retry.onclick=()=>this.update(this.last.items,this.last.catalog);this.status.append(retry);
+   const retry=document.createElement('button');retry.type='button';retry.textContent='重试';retry.onclick=()=>this.update(this.last.items,this.last.catalog,this.last.appearance);this.status.append(retry);
   }
  }
  fitCamera(reset=false){

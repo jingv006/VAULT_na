@@ -1,21 +1,31 @@
-import {bounds,validate,isExposed,makeBOM,insertModule,validatePlan,csv,packEntries,estimateBOM} from './core.mjs?revision=workbench-options-1';
+import {newFoundationIssue} from './foundation.mjs?revision=foundation-1';
+import {constrainLayout,constrainedInsert} from './constraints.mjs?revision=foundation-1';
+import {COLOUR_SLOTS,DEFAULT_COLOURS,PASTEL_COLOURS,PREVIEW_KEY,readPalette,writePalette,watchPalette,previewPalette,contrastColour,mixColour} from './palette-store.mjs?revision=shared-palette-1';
+import {bounds,validate,isExposed,makeBOM,validatePlan,csv,packEntries,estimateBOM} from './core.mjs?revision=foundation-1';
 import {writeZip} from './zip.mjs';
 import {partName,folderName} from './i18n.mjs';
 import {fitPart,printerBOM,fitLabel,customPrinter} from './printers.mjs?revision=workbench-options-1';
 import {roofLibrary,roofTarget,drawerAccessoryState,setDrawerAccessory} from './workbench-options.mjs?revision=bulk-accessories-1';
 import {roofChoices,selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
-import {randomLayout} from './random-layout.mjs?revision=random-layout-1';
+import {randomLayout} from './random-layout.mjs?revision=foundation-1';
 import {matchModelDirectory} from './local-models.mjs?revision=directory-tree-2';
 const $=id=>document.getElementById(id), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n.toFixed(1)).toLocaleString('zh-CN');
 const size=n=>n>1e9?(n/1e9).toFixed(2)+' GB':n>1e6?(n/1e6).toFixed(1)+' MB':(n/1e3).toFixed(0)+' KB';
-const COLORS=['#dce2d5','#e8e6db','#c6d2c2','#d5dbdc','#e0cdbd'];
+const COLORS=PASTEL_COLOURS;
+let customColours=readPalette(),colourMode='pastel',pastelSeed=0;
+try{const pref=JSON.parse(localStorage.getItem(PREVIEW_KEY)||'{}');colourMode=pref.mode==='custom'?'custom':'pastel';pastelSeed=Number.isInteger(pref.seed)?pref.seed>>>0:0;}catch{}
+const appearance=()=>({mode:colourMode,colours:{...customColours},seed:pastelSeed});
 const KEY='vault-workbench-plan-v1';
 const PRINTER_KEY='vault-workbench-printer-v1';
 let printerData=null,geometry=null,printerSettings={id:'h2d',margin:0,reorient:false};
 try{Object.assign(printerSettings,JSON.parse(localStorage.getItem(PRINTER_KEY)||'{}'));}catch{}
 try{printerSettings.custom=customPrinter(printerSettings.custom);}catch{printerSettings.custom=customPrinter({name:'我的打印机',volume:[220,220,250]});}
+const PRINTER_BRANDS=['拓竹','创想三维','纵维立方'];
+const printerGroup=printer=>printer.brand==='自定义'?'自定义':PRINTER_BRANDS.includes(printer.brand)?printer.brand:'其他品牌';
+const printerLabel=printer=>printerGroup(printer)==='其他品牌'?printer.brand+' '+printer.name:printer.name;
+const printerGroups=()=>[...PRINTER_BRANDS,'其他品牌'].filter(group=>printerData.printers.some(printer=>printerGroup(printer)===group));
 const chosenPrinter=()=>printerSettings.id==='custom'?customPrinter(printerSettings.custom):printerData?.printers.find(p=>p.id===printerSettings.id)||printerData?.printers[0];
 function syncCustomPrinterInputs(){const p=customPrinter(printerSettings.custom);$('customPrinterForm').hidden=printerSettings.id!=='custom';$('customPrinterName').value=p.name;['X','Y','Z'].forEach((axis,i)=>$('customPrinter'+axis).value=p.volume[i]);$('customPrinterError').hidden=true;}
 const sourceBytes=(bom,copies)=>bom.parts.reduce((n,p)=>n+(linkedFiles.get(p.path)?.size??p.bytes)*(copies?p.qty:1),0);
@@ -30,11 +40,11 @@ function renderPrinters(bom=makeBOM(state,cat)){
  $('printerSummary').className='printer-summary '+result.status;
  $('printerSummary').textContent=!bom.parts.length?'添加模块后自动检查各零件尺寸':result.blockedFiles?`${p.brand} ${p.name}：${result.blockedFiles} 种 / ${result.blockedCopies} 份零件当前放不下`:`${p.brand} ${p.name}：${fitSummary(result)}`;
  $('printerVolume').textContent=dimensionsText(p.volume)+' · 宽 × 深 × 高';
- $('printerSource').hidden=p.id==='custom';if(p.source)$('printerSource').href=p.source;else $('printerSource').removeAttribute('href');$('printerSource').textContent='官方规格 ↗';$('customPrinterForm').hidden=printerSettings.id!=='custom';
+ $('printerSource').hidden=!p.source;if(p.source)$('printerSource').href=p.source;else $('printerSource').removeAttribute('href');$('printerSource').textContent='官方规格 ↗';$('customPrinterForm').hidden=printerSettings.id!=='custom';
  $('printerNote').textContent=(p.note?p.note+' ':'')+'检查实际 STL 外形，默认允许平面旋转90°。超界表示所检查方向放不下，斜放或拆分请在切片器核对。支撑、裙边、擦嘴及禁入区会占用额外空间；换面后需重新切片，耗材与时间仍显示原 H2D 基准。';
  $('printerIssueCount').textContent=parts.length?`查看 ${parts.length} 种需处理零件（含转向提示）`:'全部零件均在原方向尺寸范围内';
  $('printerIssues').innerHTML=parts.map(part=>`<div class="printer-issue ${part.blocked?'blocked':'rotate'}"><div><strong>${esc(partName(part))}</strong><small>${esc(fitDetails(part))} · ${part.qty}份</small><details class="source-file"><summary>原文件</summary>${esc(part.path)}</details></div><span>${part.blocked?'当前放不下':'需转向'}</span></div>`).join('');
- $('printerMatrix').innerHTML=['自定义','拓竹','创想三维','纵维立方'].map(brand=>`<div class="printer-brand ${brand==='自定义'?'printer-brand-custom':''}"><h3>${brand}</h3>${[...printerData.printers,customPrinter(printerSettings.custom)].filter(p=>p.brand===brand).map(printer=>{const r=printerBOM(bom,printer,geometry,printerSettings);return `<button class="printer-row ${r.status} ${printer.id===p.id?'selected':''}" data-printer="${printer.id}" title="${esc(dimensionsText(printer.volume)+'；'+fitSummary(r))}"><span><strong>${esc(printer.name)}</strong><small>${dimensionsText(printer.volume)}</small></span><b>${!bom.parts.length?'待添加':r.blockedFiles?r.blockedFiles+'种放不下':r.reorient?'需换面':r.rotate?'需平转':'尺寸内'}</b></button>`;}).join('')}</div>`).join('');
+ $('printerMatrix').innerHTML=['自定义',...printerGroups()].map(brand=>`<div class="printer-brand ${brand==='自定义'?'printer-brand-custom':''}"><h3>${esc(brand)}</h3>${[...printerData.printers,customPrinter(printerSettings.custom)].filter(p=>printerGroup(p)===brand).map(printer=>{const r=printerBOM(bom,printer,geometry,printerSettings);return `<button class="printer-row ${r.status} ${printer.id===p.id?'selected':''}" data-printer="${printer.id}" title="${esc(dimensionsText(printer.volume)+'；'+fitSummary(r))}"><span><strong>${esc(printerLabel(printer))}</strong><small>${dimensionsText(printer.volume)}</small></span><b>${!bom.parts.length?'待添加':r.blockedFiles?r.blockedFiles+'种放不下':r.reorient?'需换面':r.rotate?'需平转':'尺寸内'}</b></button>`;}).join('')}</div>`).join('');
  $$('#printerMatrix [data-printer]').forEach(button=>button.onclick=()=>{printerSettings.id=button.dataset.printer;$('printerSelect').value=printerSettings.id;syncCustomPrinterInputs();savePrinterSettings();});
 }
 function savePrinterSettings(){try{localStorage.setItem(PRINTER_KEY,JSON.stringify(printerSettings));}catch{}draw();renderInspector();renderStats();if($('bomDialog').open)renderBOM();}
@@ -55,12 +65,18 @@ async function refreshEstimates(){
 }
 
 let estimates=null,estimateTimer,stack3d,stack3dLoading,canvasMode='2d',previewAvailable=false;
+let committedState=null,checkpointBackup=null;
 let roofEntries=[],cat,lookup,fileMeta,state,selected=null,local=false,linkedFiles=new Map(),kind='drawer',family='all',height='all',depth='3',view='front',dims=true,magnet=true,history=[],future=[],drag=null,box=[-120,-480,650,570],homeBox=[-120,-480,650,570],bomTab='parts',toastTimer,exporting=false;
 function toast(message){$('toast').textContent=message;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),4000);}
 function sample(){return {version:1,title:'我的收纳工作台',items:[{id:'base',model:'d-L3-4',x:0,y:0,color:COLORS[0],roof:'Table'},{id:'middle',model:'d-L3-1',x:0,y:192,color:COLORS[1],roof:'Table'},{id:'top-a',model:'d-S3-2',x:0,y:240,color:COLORS[0],roof:'Table'},{id:'top-b',model:'d-S3-2',x:164.8,y:240,color:COLORS[2],roof:'Table'}],extras:[],overrides:{}};}
-function checkpoint(){history.push(JSON.stringify(state));if(history.length>60)history.shift();future=[];}
+function checkpoint(){const before=JSON.stringify(state);checkpointBackup={before,future:[...future]};history.push(before);if(history.length>60)history.shift();future=[];}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));$('saveStatus').textContent='已自动保存至本机';}catch{$('saveStatus').textContent='浏览器存储不可用，请保存方案';}}
-function update({refit=false}={}){save();draw();if(canvasMode==='3d')refreshStack3D();renderInspector();syncBulkAccessories();renderStats();if(refit)fit();$('undo').disabled=!history.length;$('redo').disabled=!future.length;$('clear').disabled=!state.items.length&&!state.extras.length&&!Object.keys(state.overrides).length;}
+function update({refit=false,constrain=true,checkFoundation=true}={}){
+ const items=magnet&&constrain?constrainLayout(state.items,lookup):state.items;
+ const issue=committedState&&checkFoundation?newFoundationIssue(committedState.items,items,lookup):null;
+ if(issue){const previous=JSON.stringify(committedState);state=structuredClone(committedState);$('projectTitle').value=state.title;if(history.at(-1)===previous){history.pop();if(checkpointBackup?.before===previous)future=checkpointBackup.future;}if(!state.items.some(a=>a.id===selected))selected=null;toast(issue.text);}
+ else state.items=items;
+ committedState=structuredClone(state);checkpointBackup=null;save();draw();if(canvasMode==='3d')refreshStack3D();renderInspector();syncBulkAccessories();renderStats();if(refit)fit();$('undo').disabled=!history.length;$('redo').disabled=!future.length;$('clear').disabled=!state.items.length&&!state.extras.length&&!Object.keys(state.overrides).length;return !issue;}
 function syncBulkAccessories(){
  for(const [id,key] of [['allDrawersGrid','grid'],['allDrawersRails','rails']]){
   const status=drawerAccessoryState(state.items,lookup,key),input=$(id);
@@ -78,7 +94,7 @@ function applyBulkAccessory(key,enabled){
  update();if($('bomDialog').open)renderBOM();
  toast(`已为 ${status.total} 个抽屉模块${enabled?'添加':'取消'}${key==='grid'?' Gridfinity 网格底板':'加强齿条'}，可撤销恢复`);
 }
-function restore(str){state=JSON.parse(str);selected=null;$('projectTitle').value=state.title;update({refit:true});}
+function restore(str){state=JSON.parse(str);if(magnet&&JSON.stringify(constrainLayout(state.items,lookup))!==JSON.stringify(state.items)){magnet=false;$('snapToggle').checked=false;toast('已恢复原自由布局，强吸附已关闭');}selected=null;$('projectTitle').value=state.title;update({refit:true,constrain:false,checkFoundation:false});}
 function undo(){if(!history.length)return;future.push(JSON.stringify(state));restore(history.pop());}
 function redo(){if(!future.length)return;history.push(JSON.stringify(state));restore(future.pop());}
 function selectedItem(){return state.items.find(i=>i.id===selected);}
@@ -86,11 +102,11 @@ async function refreshStack3D(){
  if(canvasMode!=='3d')return;
  try{
   if(!stack3d){
-   stack3dLoading??=import('./stack-viewer.mjs?revision=stack-preview-1').catch(error=>{stack3dLoading=null;throw error;});
+   stack3dLoading??=import('./stack-viewer.mjs?revision=exterior-1').catch(error=>{stack3dLoading=null;throw error;});
    const {StackViewer}=await stack3dLoading;if(canvasMode!=='3d')return;
    stack3d??=new StackViewer($('workbench3d'));
   }
-  if(canvasMode==='3d'){stack3d.setActive(true);await stack3d.update(structuredClone(state.items),cat);}
+  if(canvasMode==='3d'){stack3d.setActive(true);await stack3d.update(structuredClone(state.items),cat,appearance());}
  }catch(error){setCanvasMode('2d');toast('三维显示暂不可用：'+error.message);}
 }
 function setCanvasMode(mode){
@@ -153,47 +169,49 @@ function addSpareRoof(choice){
 }
 function addModel(id,pos,probeY){
  if(state.items.length>=500)return toast('每个方案最多 500 个模块');
- checkpoint();const m=lookup[id],sel=selectedItem();let x=sel?sel.x:0,y=sel?sel.y+lookup[sel.model].height:Math.max(0,...state.items.map(i=>i.y+lookup[i.model].height));
+ const m=lookup[id],sel=selectedItem();let x=sel?sel.x:0,y=sel?sel.y+lookup[sel.model].height:Math.max(0,...state.items.map(i=>i.y+lookup[i.model].height));
  const item={id:crypto.randomUUID(),model:id,x:pos?.x??x,y:pos?.y??y,color:COLORS[0],roof:'Table',grid:false,rails:false};
- if(pos&&magnet)state.items=insertModule(item,state.items,lookup,{probeY}).items;
- else state.items.push(item);
- selected=item.id;update({refit:!pos||outsideView()});toast('已添加 '+m.name);
+ const placement=pos&&magnet?constrainedInsert(item,state.items,lookup,{probeY}):null;
+ if(placement?.rejected)return toast(placement.reason||'此处无法完整支撑模块，请选择贴合的层位');
+ checkpoint();if(placement)state.items=placement.items;else state.items.push(item);
+ selected=item.id;if(update({refit:!pos||outsideView()}))toast('已添加 '+m.name);
 }
 function changeSelected(fn,refit=false){const i=selectedItem();if(!i)return;checkpoint();fn(i);update({refit});}
 function removeSelected(){if(!selectedItem())return;checkpoint();state.items=state.items.filter(i=>i.id!==selected);selected=null;update();}
 function duplicate(){const a=selectedItem();if(!a)return;checkpoint();const b={...a,id:crypto.randomUUID(),y:a.y+lookup[a.model].height};state.items.push(b);selected=b.id;update({refit:true});}
 function renderInspector(){const a=selectedItem();$('inspector').hidden=!a;if(!a)return;const m=lookup[a.model];const exposed=isExposed(a,state.items,lookup);
  const alternatives=cat.modules.filter(n=>n.kind===m.kind&&n.family===m.family&&n.depth===m.depth&&n.variant===m.variant);
- $('inspector').innerHTML=`<div class="selection-head"><strong>${esc(m.name)}</strong><button id="closeInspector" aria-label="关闭模块编辑">×</button></div><small>${esc(m.subtitle)}<br>${fmt(m.width)} 宽 × ${m.nominalDepth} 深 × ${m.height} 高 mm（名义）</small><label>模块高度<select id="editModel">${alternatives.map(n=>`<option value="${n.id}" ${n.id===m.id?'selected':''}>${n.floor}F · ${n.height} mm</option>`).join('')}</select></label><div class="coordinate-fields"><label>X · mm<input type="number" id="editX" min="0" max="20000" step="0.1" value="${fmtInput(a.x)}"></label><label>Y · mm<input type="number" id="editY" min="0" max="20000" step="0.1" value="${fmtInput(a.y)}"></label></div>${`<label>${m.kind==='drawer'?'顶部顶盖':'翻盖款式'}${m.kind==='drawer'&&!exposed?' · 已被上层覆盖':''}<select id="editRoof" ${m.kind==='drawer'&&!exposed?'disabled':''}>${roofChoices(m).map(([v,t])=>`<option value="${v}" ${selectedRoof(m,a.roof)===v?'selected':''}>${t}</option>`).join('')}</select></label>`}<label class="option-check"><input type="checkbox" id="editGrid" ${a.grid?'checked':''}>添加 网格收纳底板</label>${m.kind==='drawer'?`<label class="option-check"><input type="checkbox" id="editRails" ${a.rails?'checked':''}>添加加强齿条套件</label>`:''}<div class="swatches">${COLORS.map(c=>`<button style="background:${c}" class="${a.color===c?'active':''}" data-color="${c}" title="更改预览颜色"></button>`).join('')}</div><div class="selection-actions"><button id="duplicateModule">复制 ↑</button><button id="deleteModule">删除</button></div>`;
+ $('inspector').innerHTML=`<div class="selection-head"><strong>${esc(m.name)}</strong><button id="closeInspector" aria-label="关闭模块编辑">×</button></div><small>${esc(m.subtitle)}<br>${fmt(m.width)} 宽 × ${m.nominalDepth} 深 × ${m.height} 高 mm（名义）</small><label>模块高度<select id="editModel">${alternatives.map(n=>`<option value="${n.id}" ${n.id===m.id?'selected':''}>${n.floor}F · ${n.height} mm</option>`).join('')}</select></label><div class="coordinate-fields"><label>X · mm<input type="number" id="editX" min="0" max="20000" step="0.1" value="${fmtInput(a.x)}"></label><label>Y · mm<input type="number" id="editY" min="0" max="20000" step="0.1" value="${fmtInput(a.y)}"></label></div>${`<label>${m.kind==='drawer'?'顶部顶盖':'翻盖款式'}${m.kind==='drawer'&&!exposed?' · 已被上层覆盖':''}<select id="editRoof" ${m.kind==='drawer'&&!exposed?'disabled':''}>${roofChoices(m).map(([v,t])=>`<option value="${v}" ${selectedRoof(m,a.roof)===v?'selected':''}>${t}</option>`).join('')}</select></label>`}<label class="option-check"><input type="checkbox" id="editGrid" ${a.grid?'checked':''}>添加 网格收纳底板</label>${m.kind==='drawer'?`<label class="option-check"><input type="checkbox" id="editRails" ${a.rails?'checked':''}>添加加强齿条套件</label>`:''}<small class="module-colour-hint">浅色预览 · 单个模块颜色</small><div class="swatches">${COLORS.map(c=>`<button style="background:${c}" class="${a.color===c?'active':''}" data-color="${c}" title="更改预览颜色"></button>`).join('')}</div><div class="selection-actions"><button id="duplicateModule">复制 ↑</button><button id="deleteModule">删除</button></div>`;
  $('closeInspector').onclick=()=>{selected=null;draw();renderInspector();};
  $('editModel').onchange=e=>changeSelected(i=>i.model=e.target.value);
  for(const [id,key] of [['editX','x'],['editY','y']])$(id).onchange=e=>{const n=Number(e.target.value);if(Number.isFinite(n)&&n>=0&&n<=20000)changeSelected(i=>i[key]=n);else renderInspector();};
  if($('editRoof'))$('editRoof').onchange=e=>changeSelected(i=>i.roof=e.target.value);
  $('editGrid').onchange=e=>changeSelected(i=>i.grid=e.target.checked);
  if($('editRails'))$('editRails').onchange=e=>changeSelected(i=>i.rails=e.target.checked);
- $$('#inspector [data-color]').forEach(b=>b.onclick=()=>changeSelected(i=>i.color=b.dataset.color));
+ $$('#inspector [data-color]').forEach(b=>b.onclick=()=>{colourMode='pastel';pastelSeed=0;savePreviewColours();syncColourControls();changeSelected(i=>i.color=b.dataset.color);});
  $('duplicateModule').onclick=duplicate;$('deleteModule').onclick=removeSelected;
 }
 const fmtInput=n=>+n.toFixed(1);
 function shape(item,exportMode=false){
- const m=lookup[item.model],x=item.x,h=view==='top'?m.nominalDepth:m.height,y=view==='top'?-m.nominalDepth:-item.y-h,w=m.width,c=item.color||COLORS[0],active=item.id===selected&&!exportMode,pieces=m.variant==='twin'?2:1;
- let s=`<g class="module" data-id="${item.id}" tabindex="0" role="button" aria-label="${esc(m.name+' '+m.subtitle)}" transform="translate(${x} ${y})"><title>${esc(m.name+' · '+m.subtitle)}</title><rect x="1.5" y="1.5" width="${w-3}" height="${h-3}" rx="5" fill="${c}" stroke="#77866c" stroke-width="1.5"/><rect x="5" y="5" width="${w-10}" height="${h-10}" rx="3.5" fill="none" stroke="#a8b39a" stroke-width="1"/>`;
+ const m=lookup[item.model],x=item.x,h=view==='top'?m.nominalDepth:m.height,y=view==='top'?-m.nominalDepth:-item.y-h,w=m.width,p=previewPalette(item,appearance()),c=p.light,custom=colourMode==='custom',ink=custom?contrastColour(c):'#4b5b40',edge=custom?mixColour(c,ink,.5):'#77866c',inset=custom?mixColour(c,ink,.25):'#a8b39a',roofColour=custom?mixColour(c,ink,.15):'#64745a',active=item.id===selected&&!exportMode,pieces=m.variant==='twin'?2:1;
+ let s=`<g class="module" data-id="${item.id}" data-preview-light="${c}" tabindex="0" role="button" aria-label="${esc(m.name+' '+m.subtitle)}" transform="translate(${x} ${y})"><title>${esc(m.name+' · '+m.subtitle)}</title><rect x="1.5" y="1.5" width="${w-3}" height="${h-3}" rx="5" fill="${c}" stroke="${edge}" stroke-width="1.5"/><rect x="5" y="5" width="${w-10}" height="${h-10}" rx="3.5" fill="none" stroke="${inset}" stroke-width="1"/>`;
  if(view==='top'){
-  for(let k=1;k<m.depth;k++)s+=`<path d="M 8 ${h*k/m.depth} H ${w-8}" stroke="#a4b093" stroke-width=".6" opacity=".5"/>`;
-  s+=`<text x="${w/2}" y="${h/2}" text-anchor="middle" fill="#596b4a" font-family="sans-serif" font-size="10">${esc(m.name)}</text><text x="${w/2}" y="${h/2+16}" text-anchor="middle" fill="#829272" font-family="sans-serif" font-size="8">${m.nominalDepth} mm 深</text>`;
+  for(let k=1;k<m.depth;k++)s+=`<path d="M 8 ${h*k/m.depth} H ${w-8}" stroke="${inset}" stroke-width=".6" opacity=".5"/>`;
+  s+=`<text x="${w/2}" y="${h/2}" text-anchor="middle" fill="${ink}" font-family="sans-serif" font-size="10">${esc(m.name)}</text><text x="${w/2}" y="${h/2+16}" text-anchor="middle" fill="${ink}" font-family="sans-serif" font-size="8">${m.nominalDepth} mm 深</text>`;
  }else{
-  if(pieces===2)s+=`<path d="M ${m.family==='XL'?164.8:w/2} 5 V ${h-5}" stroke="#77866c" stroke-width="2"/>`;
+  if(pieces===2)s+=`<path d="M ${m.family==='XL'?164.8:w/2} 5 V ${h-5}" stroke="${edge}" stroke-width="2"/>`;
   for(let k=0;k<pieces;k++){
    const px=pieces===1?0:(k===0?0:(m.family==='XL'?164.8:w/2)),pw=pieces===1?w:(m.family==='XL'?(k===0?164.8:254):w/2),cx=px+pw/2;
-   s+=`<text x="${cx}" y="${h/2+(h<60?-2:2)}" text-anchor="middle" fill="#4b5b40" font-family="sans-serif" font-size="${h<60?9:11}" letter-spacing=".1">${esc(pieces===1?m.family+m.depth+' '+m.floor+'F':(k===0?'S':m.family==='XL'?'M':'S')+m.depth+' '+m.floor+'F')}</text>`;
-   if(m.kind==='drawer')s+=`<circle cx="${cx}" cy="${h-13}" r="3.2" fill="#819072"/><rect x="${cx-7}" y="${h-14.5}" width="14" height="3" rx="1.5" fill="#a3ae96"/>`;
-   else s+=`<rect x="${px+pw*.23-7}" y="1" width="14" height="14" rx="2" fill="#738168"/><rect x="${px+pw*.77-7}" y="1" width="14" height="14" rx="2" fill="#738168"/><path d="M ${px+pw*.23-3} 8 h 6 M ${px+pw*.77-3} 8 h 6" stroke="#c1cab6" stroke-width="2"/>`;
+   s+=`<text x="${cx}" y="${h/2+(h<60?-2:2)}" text-anchor="middle" fill="${ink}" font-family="sans-serif" font-size="${h<60?9:11}" letter-spacing=".1">${esc(pieces===1?m.family+m.depth+' '+m.floor+'F':(k===0?'S':m.family==='XL'?'M':'S')+m.depth+' '+m.floor+'F')}</text>`;
+   if(m.kind==='drawer'&&custom)s+=`<rect x="${px+7}" y="${h-5}" width="6" height="2" rx="1" fill="${p.orange}"/>`;
+   if(m.kind==='drawer')s+=`<circle cx="${cx}" cy="${h-13}" r="3.2" fill="${custom?p.dark:'#819072'}"/><rect x="${cx-7}" y="${h-14.5}" width="14" height="3" rx="1.5" fill="${custom?p.label:'#a3ae96'}"/>`;
+   else s+=`<rect x="${px+pw*.23-7}" y="1" width="14" height="14" rx="2" fill="${custom?p.dark:'#738168'}"/><rect x="${px+pw*.77-7}" y="1" width="14" height="14" rx="2" fill="${custom?p.dark:'#738168'}"/><path d="M ${px+pw*.23-3} 8 h 6 M ${px+pw*.77-3} 8 h 6" stroke="${custom?p.orange:'#c1cab6'}" stroke-width="2"/>`;
   }
   if(m.kind==='drawer'&&isExposed(item,state.items,lookup)&&item.roof!=='none'){
    const roof=selectedRoof(m,item.roof),title=roofChoices(m).find(([key])=>key===roof)?.[1];
-   let mark=roof==='Bowl'?`<path d="M1 -11V-2H${w-1}V-11" fill="none" stroke="#64745a" stroke-width="3"/>`:`<rect x="0" y="-6" width="${w}" height="5" rx="1.5" fill="#64745a"/>`;
-   if(roof==='Grid')for(let gx=12;gx<w;gx+=21)mark+=`<path d="M${gx} -7v7" stroke="#dfe6d7" stroke-width="2"/>`;
-   if(roof==='Under Table Mount')mark+=`<path d="M0 -3h-12v-5H${w+12}v5h-12" fill="none" stroke="#64745a" stroke-width="2"/>`;
+   let mark=roof==='Bowl'?`<path d="M1 -11V-2H${w-1}V-11" fill="none" stroke="${roofColour}" stroke-width="3"/>`:`<rect x="0" y="-6" width="${w}" height="5" rx="1.5" fill="${roofColour}"/>`;
+   if(roof==='Grid')for(let gx=12;gx<w;gx+=21)mark+=`<path d="M${gx} -7v7" stroke="${custom?p.dark:'#dfe6d7'}" stroke-width="2"/>`;
+   if(roof==='Under Table Mount')mark+=`<path d="M0 -3h-12v-5H${w+12}v5h-12" fill="none" stroke="${roofColour}" stroke-width="2"/>`;
    s+=`<g class="roof-preview" data-roof="${roof}"><title>${esc(title)}</title>${mark}</g>`;
   }
  }
@@ -213,7 +231,7 @@ function scene(exportMode=false){
  if(dims&&state.items.length){s+=dimension(b.x,33,b.x+b.width,33,fmt(b.width)+' mm');s+=dimension(b.x-30,0,b.x-30,-dH,fmt(dH)+' mm',true);}
  return s;
 }
-function draw(){if(!cat)return;$('canvas').setAttribute('viewBox',box.join(' '));$('canvas').innerHTML=scene();$('emptyCanvas').hidden=state.items.length>0;}
+function draw(){if(!cat)return;$('canvasWrap').dataset.colourMode=colourMode;$('canvas').setAttribute('viewBox',box.join(' '));$('canvas').innerHTML=scene();$('emptyCanvas').hidden=state.items.length>0;}
 function outsideView(){const b=bounds(state.items,lookup);return b.x-45<box[0]||b.x+b.width+30>box[0]+box[2]||-b.y-b.height-30<box[1]||65>box[1]+box[3];}
 function fit(){
  if(canvasMode==='3d'){stack3d?.fitCamera();return;}
@@ -305,7 +323,23 @@ function bindRandomLayout(){
  window.addEventListener('resize',positionRandomMenu);
  window.addEventListener('scroll',()=>{if(!$('randomLayoutMenu').hidden)positionRandomMenu();},true);
 }
+function savePreviewColours(){try{localStorage.setItem(PREVIEW_KEY,JSON.stringify({mode:colourMode,seed:pastelSeed}));}catch{}}
+function syncColourControls(){
+ $$('[data-colour-mode]').forEach(button=>{const active=button.dataset.colourMode===colourMode;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
+ $$('#workbenchPaletteInputs [data-slot]').forEach(input=>{if(input.value.toUpperCase()!==customColours[input.dataset.slot])input.value=customColours[input.dataset.slot];input.nextElementSibling.textContent=customColours[input.dataset.slot];});
+ $('workbenchPaletteHint').textContent=colourMode==='custom'?'正在使用自定义颜色 · 与尺寸总览同步':'正在使用浅色预览 · 修改下方颜色即可切换自定义';
+}
+function refreshPreviewColours(){syncColourControls();draw();if(canvasMode==='3d')refreshStack3D();}
+function bindPaletteControls(){
+ $('workbenchPaletteInputs').innerHTML=COLOUR_SLOTS.map(slot=>`<label><span>${slot.name}</span><input type="color" data-slot="${slot.id}" value="${customColours[slot.id]}" aria-label="${slot.name}颜色"><code>${customColours[slot.id]}</code></label>`).join('');
+ $$('#workbenchPaletteInputs [data-slot]').forEach(input=>input.oninput=()=>{customColours=writePalette({...customColours,[input.dataset.slot]:input.value});colourMode='custom';savePreviewColours();refreshPreviewColours();});
+ $$('[data-colour-mode]').forEach(button=>button.onclick=()=>{colourMode=button.dataset.colourMode;savePreviewColours();refreshPreviewColours();});
+ $('randomPastelColours').onclick=()=>{pastelSeed=(pastelSeed+1+Math.floor(Math.random()*0xffffff))>>>0||1;colourMode='pastel';savePreviewColours();refreshPreviewColours();};
+ $('resetWorkbenchColours').onclick=()=>{customColours=writePalette(DEFAULT_COLOURS);colourMode='custom';savePreviewColours();refreshPreviewColours();};
+ watchPalette(next=>{customColours=next;refreshPreviewColours();});syncColourControls();
+}
 function bind(){
+ bindPaletteControls();
  $('stackPreviewBtn').disabled=!previewAvailable;$('stackPreviewBtn').title=previewAvailable?'按当前布局查看真实三维装配':'通过本机服务打开后可使用真实三维预览';$('stackPreviewBtn').onclick=()=>setCanvasMode(canvasMode==='2d'?'3d':'2d');
  bindRandomLayout();
  $('allDrawersGrid').onchange=e=>applyBulkAccessory('grid',e.target.checked);
@@ -318,7 +352,7 @@ function bind(){
  $('undo').onclick=undo;$('redo').onclick=redo;$('clear').onclick=()=>{if(!state.items.length&&!state.extras.length&&!Object.keys(state.overrides).length)return;checkpoint();state.items=[];state.extras=[];state.overrides={};selected=null;update({refit:true});toast('已清除所有模块和备用件，可撤销恢复');};
  $('loadExample').onclick=()=>{checkpoint();state=sample();selected=null;$('projectTitle').value=state.title;update({refit:true});toast('已载入示例，可撤销回到原方案');};
  $('projectTitle').onchange=e=>{checkpoint();state.title=e.target.value.trim()||'我的收纳工作台';update();};
- $('snapToggle').onchange=e=>magnet=e.target.checked;$('dimToggle').onchange=e=>{dims=e.target.checked;draw();};
+ $('snapToggle').onchange=e=>{magnet=e.target.checked;if(magnet){const next=constrainLayout(state.items,lookup);if(JSON.stringify(next)!==JSON.stringify(state.items)){checkpoint();state.items=next;if(update({refit:true}))toast('已按强吸附整理层位，消除空隙与重叠，可撤销');}}};$('dimToggle').onchange=e=>{dims=e.target.checked;draw();};
  $$('.view-tabs button').forEach(b=>b.onclick=()=>{view=b.dataset.view;$$('.view-tabs button').forEach(x=>x.classList.toggle('active',x===b));selected=null;renderInspector();fit();if(view==='top')toast('俯视图预览占地，切回正面可拖动堆叠');});
  $('zoomIn').onclick=()=>zoom(.82);$('zoomOut').onclick=()=>zoom(1.22);$('fit').onclick=fit;
  $('canvas').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoom(e.deltaY>0?1.08:.92);}},{passive:false});
@@ -336,12 +370,12 @@ function bind(){
   if(!drag.moved)return;
   const p=svgPoint(e),candidate={...drag.initial,x:Math.max(0,drag.initial.x+p.x-drag.start.x),y:Math.max(0,drag.initial.y-p.y+drag.start.y)};
   if(magnet) {
-   const result=insertModule(candidate,drag.items,lookup,{probeY:-p.y,threshold:Math.min(15,10*box[2]/homeBox[2])});
-   state.items=result.items;drag.insertion=result.insertion;
+   const result=constrainedInsert(candidate,drag.items,lookup,{probeY:-p.y,threshold:Math.min(15,10*box[2]/homeBox[2])});
+   state.items=result.items;drag.insertion=result.insertion;drag.rejected=result.rejected;drag.reason=result.reason;
   } else {state.items=drag.items.map(i=>i.id===candidate.id?candidate:{...i});drag.insertion=null;}
   $('inspector').hidden=true;draw();
  };
- function endDrag(cancel=false){if(!drag)return;const d=drag;drag=null;if(!d.pan&&d.moved){if(cancel)state=JSON.parse(d.before);else if(JSON.stringify(state)!==d.before){history.push(d.before);if(history.length>60)history.shift();future=[];}update({refit:!cancel&&outsideView()});}else {draw();renderInspector();}}
+ function endDrag(cancel=false){if(!drag)return;const d=drag;drag=null;if(!d.pan&&d.moved){if(cancel)state=JSON.parse(d.before);else if(JSON.stringify(state)!==d.before){checkpointBackup={before:d.before,future:[...future]};history.push(d.before);if(history.length>60)history.shift();future=[];}update({refit:!cancel&&outsideView()});}else {draw();renderInspector();}if(d.rejected&&!cancel)toast(d.reason||'此位置无法完整支撑模块，已保持原层位');}
  $('canvas').onpointerup=()=>endDrag();$('canvas').onpointercancel=()=>endDrag(true);
  $('canvas').onkeydown=e=>{if(e.key==='Enter'&&e.target.closest('.module')){selected=e.target.closest('.module').dataset.id;draw();renderInspector();}};
  $('canvasWrap').ondragover=e=>{e.preventDefault();e.dataTransfer.dropEffect='copy';};
@@ -362,7 +396,7 @@ function bind(){
  $('csvExport').onclick=()=>download(new Blob([exportCSV()],{type:'text/csv;charset=utf-8'}),planName()+'-打印清单.csv');
  $('svgExport').onclick=()=>download(new Blob([exportSVG()],{type:'image/svg+xml'}),planName()+'.svg');
  $('savePlan').onclick=()=>download(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),planName()+'.vault.json');
- $('importPlan').onclick=()=>$('planInput').click();$('planInput').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>5e6)throw Error('方案文件过大');const next=validatePlan(JSON.parse(await file.text()),cat);checkpoint();state=next;selected=null;$('projectTitle').value=state.title;update({refit:true});toast('方案已导入');}catch(err){toast('导入失败：'+err.message);}e.target.value='';};
+ $('importPlan').onclick=()=>$('planInput').click();$('planInput').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>5e6)throw Error('方案文件过大');const next=validatePlan(JSON.parse(await file.text()),cat);checkpoint();state=next;selected=null;$('projectTitle').value=state.title;if(update({refit:true}))toast('方案已导入');}catch(err){toast('导入失败：'+err.message);}e.target.value='';};
  $('chooseModelDirectory').disabled=false;
  for(const id of ['connectLibrary','connectExport','chooseModelDirectory'])$(id).onclick=()=>$('folderInput').click();
  $('folderInput').onchange=e=>{try{if(!e.target.files.length)return;const result=matchModelDirectory(e.target.files,cat);linkedFiles=result.files;local=false;connectionUI();$('chooseModelDirectory').textContent='重新选择模型目录';$('modelDirectoryStatus').querySelector('span').textContent=`已匹配 ${result.stls}/${result.totalSTLs} STL`;if($('exportDialog').open)renderExport();toast(`已连接 ${result.root} · ${result.stls}/${result.totalSTLs} STL${result.missing.length?'，部分模型在内部文件树中未找到':''}${result.wrongSize.length?'，'+result.wrongSize.length+' 个文件大小与参考版本不同（仍可使用）':''} · 仅本地读取`);}catch(error){toast(error.message);}finally{e.target.value='';}};
@@ -372,9 +406,9 @@ function bind(){
 async function init(){try{const r=await fetch('catalog.json?revision=aligned-holes-2',{cache:'no-store'});if(!r.ok)throw Error('目录文件读取失败');cat=await r.json();lookup=Object.fromEntries(cat.modules.map(m=>[m.id,m]));roofEntries=roofLibrary(cat);fileMeta=Object.fromEntries(cat.files.map(f=>[f.path,f]));$('moduleCount').textContent=cat.modules.length;
  try{const saved=localStorage.getItem(KEY);state=saved?validatePlan(JSON.parse(saved),cat):sample();}catch{state=sample();toast('上次方案无法读取，已载入示例');}
  $('projectTitle').value=state.title;
- try{const responses=await Promise.all([fetch('printers.json'),fetch('geometry.json')]);if(responses.some(r=>!r.ok))throw Error('打印机数据不可用');[printerData,geometry]=await Promise.all(responses.map(r=>r.json()));if(printerSettings.id!=='custom'&&!printerData.printers.some(p=>p.id===printerSettings.id))printerSettings.id='h2d';printerSettings.margin=[0,3,5].includes(printerSettings.margin)?printerSettings.margin:0;printerSettings.reorient=printerSettings.reorient===true;$('printerSelect').innerHTML=['拓竹','创想三维','纵维立方'].map(brand=>`<optgroup label="${brand}">${printerData.printers.filter(p=>p.brand===brand).map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</optgroup>`).join('')+'<optgroup label="自定义"><option value="custom">自定义打印机</option></optgroup>';$('printerSelect').value=printerSettings.id;syncCustomPrinterInputs();$('printerMargin').value=printerSettings.margin;$('printerReorient').checked=printerSettings.reorient;}catch(e){toast(e.message);}
+ try{const responses=await Promise.all([fetch('printers.json?revision=other-printers-1',{cache:'no-store'}),fetch('geometry.json')]);if(responses.some(r=>!r.ok))throw Error('打印机数据不可用');[printerData,geometry]=await Promise.all(responses.map(r=>r.json()));if(printerSettings.id!=='custom'&&!printerData.printers.some(p=>p.id===printerSettings.id))printerSettings.id='h2d';printerSettings.margin=[0,3,5].includes(printerSettings.margin)?printerSettings.margin:0;printerSettings.reorient=printerSettings.reorient===true;$('printerSelect').innerHTML=printerGroups().map(brand=>`<optgroup label="${esc(brand)}">${printerData.printers.filter(p=>printerGroup(p)===brand).map(p=>`<option value="${p.id}">${esc(printerLabel(p))}</option>`).join('')}</optgroup>`).join('')+'<optgroup label="自定义"><option value="custom">自定义打印机</option></optgroup>';$('printerSelect').value=printerSettings.id;syncCustomPrinterInputs();$('printerMargin').value=printerSettings.margin;$('printerReorient').checked=printerSettings.reorient;}catch(e){toast(e.message);}
  try{const res=await fetch('/api/status');if(res.ok){const status=await res.json();local=status.local&&status.ready;previewAvailable=local;}}catch{}
- await refreshEstimates();bind();renderLibrary();connectionUI();update({refit:true});window.VaultWorkbench={getState:()=>structuredClone(state),getCatalog:()=>cat,getBOM:()=>makeBOM(state,cat),getWarnings:()=>validate(state.items,lookup),getEstimate:()=>estimateFor(makeBOM(state,cat)),getPrinterReport:()=>compatibility(makeBOM(state,cat)),getPrinters:()=>printerData,getGeometry:()=>geometry};
+ await refreshEstimates();bind();renderLibrary();connectionUI();const aligned=constrainLayout(state.items,lookup);if(JSON.stringify(aligned)!==JSON.stringify(state.items)){checkpoint();state.items=aligned;toast('已按强吸附整理当前层位，可撤销');}update({refit:true});window.VaultWorkbench={getState:()=>structuredClone(state),getCatalog:()=>cat,getBOM:()=>makeBOM(state,cat),getWarnings:()=>validate(state.items,lookup),getEstimate:()=>estimateFor(makeBOM(state,cat)),getPrinterReport:()=>compatibility(makeBOM(state,cat)),getPrinters:()=>printerData,getGeometry:()=>geometry};
  const requestedKit=new URLSearchParams(location.search).get('kit');if(requestedKit&&lookup[requestedKit]){addModel(requestedKit);window.history.replaceState(null,'','workbench.html');}
  }catch(e){$('modelList').innerHTML='<div class="empty">'+esc(e.message)+'<br>请通过本地服务或在线地址打开工作台。</div>';toast(e.message);}}
 init();

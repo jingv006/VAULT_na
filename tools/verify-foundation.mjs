@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {foundationWarnings,newFoundationIssue} from '../dist/foundation.mjs';
+import {validate} from '../dist/core.mjs';
+import {constrainLayout,constrainedInsert} from '../dist/constraints.mjs';
+import {randomLayout} from '../dist/random-layout.mjs';
+const cat=JSON.parse(fs.readFileSync(new URL('../dist/catalog.json',import.meta.url))),lookup=Object.fromEntries(cat.modules.map(m=>[m.id,m]));
+const a=(id,model,x,y)=>({id,model,x,y,color:'#dce2d5',roof:'none'});
+const ss=[a('s1','d-S3-1',0,0),a('s2','d-S3-2',164.8,0)];
+const sm=[a('s1','d-S3-1',0,0),a('m','d-M3-2',164.8,0)];
+assert.equal(foundationWarnings(ss,lookup)[0].requiredFamily,'L');assert.equal(foundationWarnings(sm,lookup)[0].requiredFamily,'XL');
+assert.equal(foundationWarnings([a('m','d-M3-1',0,0),a('s','d-S3-1',254,0)],lookup)[0].requiredFamily,'XL');
+const secondS=constrainedInsert(a('newS','d-S3-1',164.8,0),[ss[0]],lookup,{probeY:10});assert.equal(secondS.rejected,true);assert.match(secondS.reason,/L3/,'adding adjacent S without a shared base must reject');
+const secondM=constrainedInsert(a('newM','d-M3-1',164.8,0),[ss[0]],lookup,{probeY:10});assert.equal(secondM.rejected,true);assert.match(secondM.reason,/XL3/);
+assert.equal(validate(ss,lookup).filter(w=>w.type==='foundation').length,1);
+assert.deepEqual(foundationWarnings([ss[0]],lookup),[]);assert.deepEqual(foundationWarnings([ss[0],{...ss[1],x:0,y:48}],lookup),[]);
+const support=(items,family,depth=3,variant='')=>[a('base',`d-${family}${depth}-1${variant}`,0,0),...items.map(i=>({...i,y:i.y+48}))];
+const valid= support(ss,'L');assert.deepEqual(foundationWarnings(valid,lookup),[]);assert.deepEqual(foundationWarnings(support(sm,'XL'),lookup),[]);
+assert.deepEqual(foundationWarnings(support(ss,'L',3,'-twin'),lookup),[],'integrated wide twin cabinet also supports upper pairs');
+assert.deepEqual(foundationWarnings(support(ss,'XL'),lookup),[],'larger common base is allowed');
+assert(foundationWarnings(support(sm,'L'),lookup).length,'L cannot span S + M');
+assert(foundationWarnings(support(ss,'L',4),lookup).length,'base must have the same depth');
+assert(foundationWarnings(valid.map(i=>i.id==='base'?{...i,y:200}:i),lookup).length,'wide module above a pair cannot serve as its base');
+const other=valid.map(i=>({...i,id:i.id+'-other',x:i.x+329.6}));assert.deepEqual(foundationWarnings([...valid,...other],lookup),[],'adjacent complete cabinets keep their own foundations');
+const without=constrainLayout(valid.filter(i=>i.id!=='base'),lookup);assert(newFoundationIssue(valid,without,lookup),'deleting the last base violates assembly rule');
+const moved=constrainedInsert({...valid[0],x:900,y:0},valid,lookup,{probeY:0});assert.equal(moved.rejected,true);assert.match(moved.reason,/底座/);assert.deepEqual(moved.items,valid);
+const inserted=constrainedInsert(a('newbase','d-L3-1',0,0),ss,lookup,{probeY:0});assert.equal(inserted.rejected,false);assert.deepEqual(foundationWarnings(inserted.items,lookup),[],'legacy narrow floor pair can be repaired by inserting the missing wide base');
+assert.equal(newFoundationIssue(ss.map(i=>i.id==='s2'?{...i,model:'d-S4-2'}:i),ss,lookup),undefined,'legacy wrong-depth pair can be repaired without adding a new footprint');
+assert(newFoundationIssue([],ss,lookup));assert.equal(newFoundationIssue(ss,ss.map(i=>({...i,color:'#ffffff'})),lookup),undefined,'legacy warnings do not block unrelated edits');
+let seed=77;const rng=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32);let count=0;
+for(const family of ['L','XL'])for(const depth of [3,4,5,6,7])for(const kind of ['drawer','sustainer','mixed'])for(let height=1;height<=40;height++){
+ const items=randomLayout(cat,{family,depth,kind,totalF:height},rng),base=lookup[items[0].model];
+ assert.equal(items[0].y,0);assert.equal(base.family,family);assert.notEqual(base.variant,'twin','random base uses one intact standard module');
+ assert.deepEqual(validate(items,lookup),[]);assert.deepEqual(foundationWarnings(items,lookup),[]);count++;
+}
+console.log(`Shared foundation: S+S / S+M, both orders, ground position, same depth, twin bases, independent cabinets, move/delete rejection, legacy repair and ${count} random layouts passed`);

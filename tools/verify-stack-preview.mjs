@@ -10,10 +10,11 @@ const items=[
  {id:'base',model:'d-L3-2-twin',x:50,y:0,roof:'Bowl',color:'#c6d2c2'},
  {id:'left',model:'d-S3-1',x:50,y:96,roof:'Grid',grid:true,rails:true,color:'#e0cdbd'},
  {id:'right',model:'d-S3-2',x:214.8,y:96,roof:'none',color:'#d5dbdc'},
- {id:'flip',model:'s-S6-2-standard',x:600,y:0,roof:'Whole',color:'#dce2d5'}
+ {id:'flip',model:'s-S6-2-standard',x:600,y:0,roof:'Whole',color:'#dce2d5'},
+ {id:'xl',model:'d-XL5-1',x:1000,y:0,roof:'Table',grid:true,color:'#d5dbdc'}
 ];
 const before=JSON.stringify(items),plan=stackLayout(items,catalog);
-assert.equal(plan.length,4);assert.equal(plan[0].options.roof,'none','covered cabinet roof removed');
+assert.equal(plan.length,5);assert.equal(plan[0].options.roof,'none','covered cabinet roof removed');
 assert.equal(plan[1].options.roof,'Grid');assert.equal(plan[1].options.grid,true);assert.equal(plan[1].options.rails,true);
 assert.equal(plan[2].options.roof,'none');assert.equal(plan[3].options.roof,'Whole');
 assert.deepEqual(plan.map(e=>[e.id,e.x,e.z]),items.map(i=>[i.id,i.x,i.y]));
@@ -41,7 +42,7 @@ for(const entry of plan){
  if(entry.options.roof==='none')assert(!module.moves.some(p=>p.mesh.userData.role==='顶盖'));
  if(entry.options.roof==='Whole')assert.equal(module.moves.filter(p=>p.mesh.userData.role==='翻盖').length,1);
 }
-assert.equal(group.children.length,4);
+assert.equal(group.children.length,5);
 const stackBOM=makeBOM({items,extras:[],overrides:{}},catalog);
 assert(!stackBOM.parts.some(p=>p.path.includes('L3 Bowl Roof')),'BOM and preview agree on covered roof');
 const moved=stackLayout(items.map(i=>i.id==='right'?{...i,x:400,y:144}:i),catalog);

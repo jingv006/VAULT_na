@@ -14,10 +14,10 @@ export function roofDescription(m,value){
  return name+(roof==='Split'?'（2 片盖板＋连接件）':roof==='Whole'?'（1 片盖板）':'');
 }
 // Accept a preview only if its actual roof files match the selected recipe.
-export function verifyPreviewRoof(m,value,parts){
+export function verifyPreviewRoof(m,value,parts,{exterior=false}={}){
  const roof=selectedRoof(m,value),roles=m.kind==='drawer'?['顶盖']:['翻盖','翻盖分件','翻盖连接件'];
  const expected=m.kind==='drawer'?(m.roofs?.[roof]||[]):(m.lidRoofs?.[roof]||m.parts.filter(p=>roles.includes(p.role)));
- const signature=rows=>JSON.stringify(rows.map(p=>[p.path,p.qty]).sort((a,b)=>a[0].localeCompare(b[0])));
+ const signature=rows=>JSON.stringify(rows.filter(p=>!exterior||p.role!=='翻盖连接件').map(p=>[p.path,p.qty]).sort((a,b)=>a[0].localeCompare(b[0])));
  if(signature(expected)!==signature(parts.filter(p=>roles.includes(p.role))))throw Error('返回的顶盖模型与所选款式不一致，请重试');
  return roof;
 }

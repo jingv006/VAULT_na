@@ -26,7 +26,12 @@ export function alignedDrawerPart(d,p,c,{drawer,n,component}){
  const keyAsset=d.keyAsset,capAsset=d.capAsset;
  if(role==='柜体'){position=[0,0,d.H/2];explosion=[0,0,0];}
  else if(role==='顶盖'){position=[0,0,d.outsideCeiling-surface(a,'z',-1,-sz[2]/2+4.8)];explosion=[0,0,85];anchor='roof-seat';}
- else if(role==='抽屉盒'){position=[f.x,f.faceBack-a.size[1]/2,d.boxBottom+sz[2]/2];explosion=[0,d.D*.55,0];moving=true;anchor='box-floor';}
+ else if(['抽屉盒','抽屉盒分件','抽屉背板'].includes(role)){
+  const rear=role==='抽屉背板'||role==='抽屉盒分件'&&p.path.includes('Part 2');
+  const depth=d.boxDepths?.[drawer]??a.size[1];
+  position=[f.x,rear?f.faceBack-depth+sz[1]/2:f.faceBack-a.size[1]/2,d.boxBottom+sz[2]/2];
+  explosion=[0,d.D*.55,0];moving=true;anchor=rear?'box-rear-seat':'box-floor';
+ }
  else if(role==='面板'){position=[f.x,f.faceY,f.faceZ];explosion=[0,d.D*.95,0];moving=true;anchor='facade';}
  else if(role==='旋钮锁芯'||role==='旋钮帽'){
   const gearFront=levels(keyAsset,'y').filter(p=>p.normal===1&&p.area>100&&p.at<0).sort((a,b)=>a.at-b.at)[0]?.at??-13.51;
@@ -46,7 +51,7 @@ export function alignedDrawerPart(d,p,c,{drawer,n,component}){
   explosion=[side*15,d.D*.85,0];moving=true;anchor='spring-boss';
  }
  else if(role==='导轨'||role==='滑轨'){
-  const boxWidth=f.width-30.6;
+  const boxWidth=d.boxAssets?.[drawer]?.size[0]??f.width-30.6;
   const xx=role==='导轨'?f.width/2-3-sz[0]/2:boxWidth/2+sz[0]/2-1.5;
   const level=Math.floor((n%(d.railRows*2))/2);position=[f.x+side*xx,role==='导轨'?1.7:f.faceBack-a.size[1]/2-1,f.axisZ+48*level];if(side>0)rotation[1]=Math.PI;
   explosion=[side*(45+(role==='滑轨'?18:0)),role==='滑轨'?d.D*.45:0,0];moving=role==='滑轨';anchor='runner-channel';
@@ -66,7 +71,7 @@ export function alignedDrawerPart(d,p,c,{drawer,n,component}){
  }
  else if(role==='网格收纳底板'){
   const box=d.boxAssets?.[drawer],floor=box?surface(box,'z',1,-box.size[2]/2+3)+box.size[2]/2:3;
-  position=[f.x,f.faceBack-(box?.size[1]??d.D-2.3)/2,d.boxBottom+floor+.15+sz[2]/2];explosion=[0,d.D*.5,70];moving=true;anchor='inside-box-floor';
+  position=[f.x,f.faceBack-(d.boxDepths?.[drawer]??box?.size[1]??d.D-2.3)/2,d.boxBottom+floor+.15+sz[2]/2];explosion=[0,d.D*.5,70];moving=true;anchor='inside-box-floor';
  }
  if(!position)return null;
  return {position,rotation,explosion,moving,anchor,drawer};

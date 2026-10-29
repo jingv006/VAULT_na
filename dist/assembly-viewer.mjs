@@ -2,7 +2,7 @@ import * as T from './vendor/three/three.module.js';
 import {roofChoices,selectedRoof,roofDescription,verifyPreviewRoof} from './roof-options.mjs?revision=flip-roof-load-2';
 import {OrbitControls} from './vendor/three/OrbitControls.js';
 import {sustainerDatums,alignedSustainerPart,sustainerLockPose,sustainerLockPlacement} from './sustainer-alignment.mjs?revision=flip-roofs-1';
-import {drawerDatums,alignedDrawerPart} from './drawer-alignment.mjs?revision=outer-stoppers-1';
+import {drawerDatums,alignedDrawerPart} from './drawer-alignment.mjs?revision=xl-drawers-1';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const cache=new Map();
 export async function geometries(asset){
@@ -80,7 +80,14 @@ export class AssemblyViewer{
   const sustainer=m.kind==='sustainer'?sustainerDatums(m,parts):null;this.sustainer=sustainer;
   const twin=m.variant==='twin',cuts=twin?[164.8,W-164.8]:[W];const centers=cuts.map((w,i)=>-W/2+cuts.slice(0,i).reduce((a,b)=>a+b,0)+w/2);
   const lid=new T.Group();lid.position.set(0,-D/2,H-5);this.root.add(lid);this.lid=lid;if(sustainer)lid.position.set(0,sustainer.axisY,sustainer.rim);
-  let sequence={};const datums=m.kind==='drawer'?drawerDatums(m,parts):null;this.datums=datums;if(datums){datums.keyAsset=parts.find(p=>p.role==='旋钮锁芯')?.asset;datums.capAsset=parts.find(p=>p.role==='旋钮帽')?.asset;datums.boxAssets=datums.frames.map(f=>parts.filter(p=>p.role==='抽屉盒').sort((a,b)=>Math.abs(a.asset.size[0]-(f.width-30.6))-Math.abs(b.asset.size[0]-(f.width-30.6)))[0]?.asset);}
+  let sequence={};const datums=m.kind==='drawer'?drawerDatums(m,parts):null;this.datums=datums;
+  if(datums){
+   datums.keyAsset=parts.find(p=>p.role==='旋钮锁芯')?.asset;datums.capAsset=parts.find(p=>p.role==='旋钮帽')?.asset;
+   const fronts=parts.filter(p=>p.role==='抽屉盒'||p.role==='抽屉盒分件'&&p.path.includes('Part 1'));
+   datums.boxAssets=datums.frames.map(f=>[...fronts].sort((a,b)=>Math.abs(a.asset.size[0]-(f.width-30.6))-Math.abs(b.asset.size[0]-(f.width-30.6)))[0]?.asset);
+   // Split XL6/7 boxes retain the one-piece XL boxes' 2.2mm depth clearance.
+   datums.boxDepths=datums.frames.map((f,i)=>parts.some(p=>p.role==='抽屉盒分件')?D-2.2:datums.boxAssets[i]?.size[1]);
+  }
   parts.forEach((p,pi)=>{
    const role=p.role,gs=assets[pi],multi=['弹簧套件','堆叠锁扣','加强齿条套件','上铰链套件','下铰链套件','铰链轴套件','锁扣插销套件'].includes(role);
    const mat=new T.MeshStandardMaterial({color:this.colours[p.slot]||p.colour,roughness:.58,metalness:0,side:T.DoubleSide});this.materials.push([mat,p.slot]);

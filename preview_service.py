@@ -3,11 +3,25 @@
 from pathlib import Path
 import hashlib,json,threading,subprocess
 import kit_service as kits
+# Exposed mechanisms remain: the named inner lock link sits outside the box.
+EXTERIOR_ROLES={'柜体','箱体','面板','前面板','顶盖','翻盖','翻盖分件','旋钮锁芯','旋钮帽','面板端盖','标签','箱体标签','锁扣标签','限位件','堆叠锁扣','上铰链套件','下铰链套件','铰链轴套件','锁扣座','锁扣内件','锁扣外件','锁扣插销套件'}
+
+def preview_recipe(payload):
+    spec=kits.specification(payload)
+    detail=payload.get('detail','full')
+    if detail not in ('full','exterior'):raise ValueError('预览精细度无效')
+    spec['detail']=detail
+    if detail=='exterior':spec.update(grid=False,rails=False)
+    rows=kits.recipe(spec)
+    if detail=='exterior':rows=[p for p in rows if p['role'] in EXTERIOR_ROLES]
+    return spec,rows
+
 BASE=kits.BASE;ASSETS=BASE/'dist/preview-assets';TEMP=BASE/'tmp/preview';JOBS={};LOCK=threading.Lock();WORKER=threading.Semaphore(1)
 
 def asset_info(part):
     source=kits.LIB/part['path'];s=source.stat()
     version=(15 if part['role'] in ['翻盖','翻盖分件'] else 14 if part['role']=='箱体' else 13) if part['path'].startswith('02. SUSTAINERS/') else (10 if part['role'] in ['面板','旋钮帽'] else 9)
+    if part['path'].startswith('01. DRAWERS/') and part['path'].rsplit('/',1)[-1].startswith('XL') and part['role'] in ['柜体','顶盖','抽屉盒','抽屉盒分件','抽屉背板','网格收纳底板']:version=16
     ident=hashlib.sha256(f"{version}:{part['path']}:{s.st_size}:{s.st_mtime_ns}".encode()).hexdigest()[:24]
     return ident,source
 
@@ -26,12 +40,12 @@ def run(ident,spec,rows,plan):
             for row,source in zip(rows,plan['parts']):
                 asset=json.loads((ASSETS/(source['id']+'.json')).read_text())
                 parts.append({**row,'asset':asset})
-            job.update(status='done',done=len(rows),total=len(rows),current='真实三维模型已载入',data={'model':spec['model'],'parts':parts,'source':'original-STL display meshes','placement':'display assembly; not a mechanical interference check'})
+            job.update(status='done',done=len(rows),total=len(rows),current='真实三维模型已载入',data={'model':spec['model'],'detail':spec['detail'],'parts':parts,'source':'original-STL display meshes','placement':'display assembly; not a mechanical interference check'})
     except Exception as exc:job.update(status='error',error=str(exc))
 
 def request(payload):
-    spec=kits.specification(payload);rows=kits.recipe(spec);m=kits.MODULES[spec['model']]
-    ident=hashlib.sha256(json.dumps([spec['model'],spec['roof'],spec['grid'],spec['rails'],[[asset_info(p)[0],p['qty']] for p in rows]]).encode()).hexdigest()[:24]
+    spec,rows=preview_recipe(payload);m=kits.MODULES[spec['model']]
+    ident=hashlib.sha256(json.dumps([spec['model'],spec['roof'],spec['grid'],spec['rails'],spec['detail'],[[asset_info(p)[0],p['qty']] for p in rows]]).encode()).hexdigest()[:24]
     TEMP.mkdir(parents=True,exist_ok=True);ASSETS.mkdir(parents=True,exist_ok=True)
     with LOCK:
         if ident in JOBS and JOBS[ident]['status']!='error':return public(JOBS[ident])

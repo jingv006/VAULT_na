@@ -1,3 +1,4 @@
+import {foundationWarnings} from './foundation.mjs?revision=foundation-1';
 const colours=['#dce2d5','#e8e6db','#c6d2c2','#d5dbdc','#e0cdbd'];
 const widths={S:164.8,M:254,L:329.6,XL:418.8};
 
@@ -21,7 +22,9 @@ export function randomLayout(catalog,{family='L',depth=3,totalF=8,kind='drawer'}
    y+=m.height;remaining-=floor;
   }
  };
- const base=pick(byFamily(family).filter(m=>m.floor<=totalF));
+ const bases=byFamily(family).filter(m=>m.floor<=totalF&&m.variant!=='twin');
+ if(!bases.length)throw Error('此尺寸暂没有可用的完整底座');
+ const base=pick(bases);
  // Use the selected full-width module for the bottom footprint.
  items.push({id:'random-0',model:base.id,x:0,y:0,color:pick(colours),roof:base.kind==='drawer'?'Table':base.defaultLid,grid:false,rails:false});
  let filled=base.floor;
@@ -33,5 +36,6 @@ export function randomLayout(catalog,{family='L',depth=3,totalF=8,kind='drawer'}
   for(const f of columns){addColumn(f,x,filled*48,band);x+=widths[f];}
   filled+=band;
  }
+ if(foundationWarnings(items,Object.fromEntries(catalog.modules.map(m=>[m.id,m]))).length)throw Error('搭配缺少共用底座，请重新生成');
  return items;
 }

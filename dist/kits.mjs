@@ -2,9 +2,10 @@ import {makeBOM,estimateBOM,csv} from './core.mjs?revision=flip-roof-load-2';
 import {partName} from './i18n.mjs';
 import {printerBOM} from './printers.mjs';
 import {kitPreview} from './kit-preview.mjs?revision=flip-roof-load-2';
-import {KitDisplay} from './kit-display.mjs?revision=flip-roof-load-2';
+import {KitDisplay} from './kit-display.mjs?revision=xl-drawers-1';
 import {roofChoices,selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
 import {matchModelDirectory} from './local-models.mjs?revision=directory-tree-2';
+import {readPalette,writePalette,watchPalette,DEFAULT_COLOURS} from './palette-store.mjs?revision=shared-palette-1';
 let viewer,selectedFiles=new Map(),fileURLs=new Map();
 function localFileURL(path){
  const file=selectedFiles.get(path);if(!file)return null;
@@ -65,7 +66,7 @@ function renderDetail(){
 }
 function renderPalette(){
  $('paletteInputs').innerHTML=palette.slots.map(s=>`<label><input type="color" data-slot="${s.id}" value="${colours[s.id]}" aria-label="${s.name}颜色"><span>${s.name}</span><small>${colours[s.id]}</small></label>`).join('');
- document.querySelectorAll('[data-slot]').forEach(input=>input.oninput=()=>{colours[input.dataset.slot]=input.value.toUpperCase();try{localStorage.setItem('vault-kit-colours',JSON.stringify(colours));}catch{}input.parentElement.querySelector('small').textContent=input.value.toUpperCase();renderDetail();});
+ document.querySelectorAll('[data-slot]').forEach(input=>input.oninput=()=>{colours[input.dataset.slot]=input.value.toUpperCase();colours=writePalette(colours);input.parentElement.querySelector('small').textContent=input.value.toUpperCase();renderDetail();});
 }
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}
 async function downloadKit(){
@@ -82,16 +83,16 @@ async function downloadKit(){
 }
 async function init(){
  try{[cat,estimates,palette,geometry,printers]=await Promise.all(['catalog.json','estimates.json','palette.json','geometry.json','printers.json'].map(async path=>{const r=await fetch(path+(path==='catalog.json'?'?revision=aligned-holes-2':''),{cache:'no-store'});if(!r.ok)throw Error(path+' 读取失败');return r.json();}));lookup=Object.fromEntries(cat.modules.map(m=>[m.id,m]));const hash=decodeURIComponent(location.hash.slice(1));if(lookup[hash])selected=hash;kind=model().kind;
-  colours=Object.fromEntries(palette.slots.map(s=>[s.id,s.hex]));try{const saved=JSON.parse(localStorage.getItem('vault-kit-colours')||'{}');for(const s of palette.slots)if(/^#[0-9A-F]{6}$/i.test(saved[s.id]||''))colours[s.id]=saved[s.id];}catch{}try{const r=await fetch('/api/status');if(r.ok){const status=await r.json();local=status.local&&status.ready;}}catch{}
+  colours=readPalette();try{const r=await fetch('/api/status');if(r.ok){const status=await r.json();local=status.local&&status.ready;}}catch{}
   bindModelDirectory();
   $('kitSearch').oninput=e=>{query=e.target.value;renderList();};
   for(const [id,key] of [['kitFamily','family'],['kitFloor','floor'],['kitDepth','depth']])$(id).onchange=e=>{if(key==='family')family=e.target.value;if(key==='floor')floor=e.target.value;if(key==='depth')depth=e.target.value;renderList();};
   document.querySelectorAll('[data-kind]').forEach(button=>{button.classList.toggle('active',button.dataset.kind===kind);button.onclick=()=>{kind=button.dataset.kind;document.querySelectorAll('[data-kind]').forEach(b=>b.classList.toggle('active',b===button));renderList();};});
   $('kitRoof').onchange=e=>{options.roof=e.target.value;renderDetail();};$('kitGrid').onchange=e=>{options.grid=e.target.checked;renderDetail();};$('kitRails').onchange=e=>{options.rails=e.target.checked;renderDetail();};
-  $('download3mf').onclick=downloadKit;$('downloadQuick').onclick=downloadKit;$('resetPalette').onclick=()=>{try{localStorage.removeItem('vault-kit-colours');}catch{}colours=Object.fromEntries(palette.slots.map(s=>[s.id,s.hex]));renderPalette();renderDetail();};
+  $('download3mf').onclick=downloadKit;$('downloadQuick').onclick=downloadKit;$('resetPalette').onclick=()=>{colours=writePalette(DEFAULT_COLOURS);renderPalette();renderDetail();};
   $('kitCSV').onclick=()=>{const rows=colouredRows();download(new Blob([csv([['中文名称','原始文件','原始路径','打印份数','用途','颜色','材料槽'],...rows.map(p=>[partName(p),p.name,p.path,p.qty,p.role,colours[p.slot],palette.slots.findIndex(s=>s.id===p.slot)+1])])],{type:'text/csv;charset=utf-8'}),code(model())+'-文件与配色清单.csv');};
   $('referenceGrid').innerHTML=palette.sources.map(s=>`<a class="reference-card" href="${s.image}" target="_blank"><img loading="lazy" src="${s.image}" alt="${s.title}"><strong>${s.title}</strong><small>${s.file} · 第 ${s.page} 页</small></a>`).join('');
-  viewer=new KitDisplay({diagram:$('kitDiagram'),assembly:$('kitArt'),controls:$('kitViewControls'),hint:$('kitViewHint'),local,onRoofChange:roof=>{options.roof=roof;renderDetail();}});renderPalette();renderList();renderDetail();
+  viewer=new KitDisplay({diagram:$('kitDiagram'),assembly:$('kitArt'),controls:$('kitViewControls'),hint:$('kitViewHint'),local,onRoofChange:roof=>{options.roof=roof;renderDetail();}});renderPalette();renderList();renderDetail();watchPalette(next=>{colours=next;renderPalette();renderDetail();});
  }catch(e){$('kitList').innerHTML='<p class="error">'+esc(e.message)+'</p>';}
 }
 init();

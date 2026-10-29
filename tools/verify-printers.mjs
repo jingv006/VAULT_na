@@ -29,10 +29,14 @@ for(const f of stls){
  assert(!/[a-z]/i.test(words),'Untranslated word: '+zh);
  for(const printer of data.printers)assert.notEqual(fitPart(f.path,printer,geometry).status,'unknown');
 }
-assert.equal(data.printers.length,27);assert.equal(new Set(data.printers.map(p=>p.id)).size,27);
+assert(data.printers.length>=28);assert.equal(new Set(data.printers.map(p=>p.id)).size,data.printers.length);
+const arco=data.printers.find(p=>p.id==='phrozen-arco');assert.equal(arco.brand,'普罗森');assert.equal(arco.name,'Arco');assert.deepEqual(arco.volume,[300,300,300]);
+assert.equal(fitPart('part',arco,{records:{part:{size:[300,300,300]}}}).status,'fits');
+assert.equal(fitPart('part',arco,{records:{part:{size:[301,300,300]}}}).status,'oversize');
 assert.deepEqual(data.printers.find(p=>p.id==='h2d').volume,[325,320,325]);
 assert.deepEqual(data.printers.find(p=>p.id==='h2d-dual').volume,[300,320,325]);
-assert(data.printers.every(p=>/^https:\/\//.test(p.source)));
+assert(data.printers.filter(p=>p.id!=='phrozen-arco').every(p=>/^https:\/\//.test(p.source)));
+assert.equal(arco.source,null);
 let cases=0;
 for(const m of catalog.modules)for(const roof of m.kind==='drawer'?Object.keys(m.roofs):['Table']){
  const state={items:[{id:'one',model:m.id,x:0,y:0,roof,grid:true,rails:true}],extras:[],overrides:{}};
@@ -47,4 +51,4 @@ assert.equal(printerBOM(bom,h2d,geometry).blockedFiles,0);
 assert.equal(bom.parts.filter(p=>p.role==='顶盖').reduce((n,p)=>n+p.qty,0),1);
 const shell=bom.parts.find(p=>p.role==='柜体');stack.overrides[shell.path]=0;
 assert(!printerBOM(makeBOM(stack,catalog),h2d,geometry).parts.some(p=>p.path===shell.path));
-console.log(`Passed: 733 geometry records and translations; 27 printer modes; ${cases} recipe variants; rotations, margins, missing geometry, quantities and covered roofs.`);
+console.log(`Passed: 733 geometry records and translations; ${data.printers.length} printer modes; ${cases} recipe variants; rotations, margins, missing geometry, quantities and covered roofs.`);

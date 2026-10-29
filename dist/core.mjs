@@ -1,3 +1,4 @@
+import {foundationWarnings} from './foundation.mjs?revision=foundation-1';
 import {selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
 export const EPS = 0.6;
 export function bounds(items, lookup) {
@@ -22,7 +23,7 @@ export function validate(items, lookup) {
    if(below.some(b=>lookup[b.model].depth!==m.depth)) warnings.push({id:a.id,type:'depth',text:`${m.name} 与下层深度不同`});
   }
  }
- return warnings;
+ return [...warnings,...foundationWarnings(items,lookup)];
 }
 export function isExposed(item,items,lookup) {
  const m=lookup[item.model];
@@ -97,8 +98,9 @@ function liftOut(items,id,lookup) {
 
 // Plan against the drag-start geometry, never against the last preview. This
 // keeps the insertion target stable while the surrounding modules make room.
-export function insertModule(candidate,items,lookup,{probeY=candidate.y+lookup[candidate.model].height/2,threshold=10}={}) {
+export function insertModule(candidate,items,lookup,{probeY=candidate.y+lookup[candidate.model].height/2,threshold=10,lockedX=false}={}) {
  const moving={...snap(candidate,items,lookup,threshold)},width=lookup[moving.model].width;
+ if(lockedX)moving.x=candidate.x;
  const targets=items.map(a=>{
   const m=lookup[a.model],shared=Math.min(moving.x+width,a.x+m.width)-Math.max(moving.x,a.x);
   return {item:a,shared,distance:Math.max(a.y-probeY,probeY-a.y-m.height,0)};
@@ -116,7 +118,7 @@ export function insertModule(candidate,items,lookup,{probeY=candidate.y+lookup[c
   const mapped=rest.find(i=>i.id===target.id),after=probeY>=target.y+lookup[target.model].height/2;
   moving.y=mapped.y+(after?lookup[mapped.model].height:0);
   insertion={x:moving.x,y:moving.y,width,targetId:target.id,edge:after?'above':'below'};
- } else Object.assign(moving,snap(moving,rest,lookup,threshold));
+ } else {Object.assign(moving,snap(moving,rest,lookup,threshold));if(lockedX)moving.x=candidate.x;}
  // Push only collided modules, then propagate upward across bridges. Columns
  // which merely share an edge never move, and different module heights work.
  const lifted=[moving];

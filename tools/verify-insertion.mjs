@@ -22,7 +22,10 @@ const right=[{id:'r0',model:'d-S3-2',x:164.8,y:0},{id:'r1',model:'d-S3-1',x:164.
 result=move([...left,...right],'c',0,10);
 for(const a of right)assert.deepEqual(result.items.find(i=>i.id===a.id),a,'Independent column must not move');
 result=move([...left,...right],'b',164.8,10);
-assert.deepEqual(positions(result.items),{a:0,b:0,c:48,r0:96,r1:192});assert.deepEqual(validate(result.items,lookup),[]);
+assert.deepEqual(positions(result.items),{a:0,b:0,c:48,r0:96,r1:192});
+// This legacy geometry-only fixture omits a wide ground base. Its insertion
+// remains collision-free, while the new assembly validator reports that base.
+assert.deepEqual(validate(result.items,lookup).filter(w=>w.type!=='foundation'),[]);assert.equal(validate(result.items,lookup).filter(w=>w.type==='foundation').length,1);
 // A bridge propagates lifting into the other half of the stack, without moving
 // the other base at the same height or pushing touching horizontal neighbors.
 const bridge=[{id:'a',model:'d-S3-1',x:0,y:0},{id:'b',model:'d-S3-1',x:164.8,y:0},{id:'wide',model:'d-L3-1',x:0,y:48},{id:'l',model:'d-S3-2',x:0,y:96},{id:'r',model:'d-S3-2',x:164.8,y:96}];

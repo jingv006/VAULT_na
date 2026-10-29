@@ -327,6 +327,18 @@
       ],
       "source": "https://www.anycubic.com/en/kobra-3-v2-combo",
       "note": "按官方255×255×260mm规格；旧固件/切片预设可能默认250mm，请核对。"
+    },
+    {
+      "id": "phrozen-arco",
+      "brand": "普罗森",
+      "name": "Arco",
+      "volume": [
+        300,
+        300,
+        300
+      ],
+      "source": null,
+      "note": "按指定的 300 × 300 × 300 mm 有效打印范围检查。"
     }
   ]
 }

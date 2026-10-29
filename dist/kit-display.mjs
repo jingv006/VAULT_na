@@ -46,7 +46,7 @@ export class KitDisplay {
  async showAssembly() {
   try {
    if(!this.viewer) {
-    this.loading??=import('./assembly-viewer.mjs?revision=flip-roof-load-2').catch(error=>{this.loading=null;throw error;});
+    this.loading??=import('./assembly-viewer.mjs?revision=xl-drawers-1').catch(error=>{this.loading=null;throw error;});
     const {AssemblyViewer}=await this.loading;
     // A switch or colour/model change may happen while the module is loading.
     if(this.mode!=='3d')return;
