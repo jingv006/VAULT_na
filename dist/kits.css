@@ -38,3 +38,5 @@
 @media(max-width:1000px){.diagram-stage{height:340px}}
 @media(max-width:800px){.diagram-stage{height:360px}}
 @media(max-width:500px){.diagram-stage{height:300px}.preview-choice{gap:8px;margin-top:12px}.preview-toggle button{padding:8px 14px}.preview-choice>span{flex-basis:100%}}
+
+.physical-dimensions{grid-column:1/-1;margin:17px 0 20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:1px solid #dee6d5;border-radius:9px;padding:17px;background:#f6f8f0}.physical-dimensions>div{min-width:0}.physical-dimensions>div>span{display:block;color:#8d9d7e;font-size:10px;margin-bottom:6px}.physical-dimensions strong{display:block;font-size:15px;font-weight:500;color:#536d43;line-height:1.6;overflow-wrap:anywhere}.physical-dimensions small{display:block;color:#9ca98f;font-size:9px;line-height:1.7;margin-top:3px}.physical-dimensions p{grid-column:1/-1;font-size:9px;line-height:1.8;color:#9ba68e;border-top:1px solid #e2e8d9;padding-top:10px;margin:0}@media(max-width:650px){.physical-dimensions{grid-template-columns:1fr;padding:13px}.physical-dimensions strong{font-size:14px}}

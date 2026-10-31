@@ -1,0 +1,1122 @@
+{
+  "pitch": 10.5,
+  "widthNumbers": {
+    "S": 10,
+    "M": 18,
+    "L": 26,
+    "XL": 32
+  },
+  "depthNumbers": {
+    "3": 10,
+    "4": 14,
+    "5": 18,
+    "6": 22,
+    "7": 26
+  },
+  "parts": [
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/10-S, x3.stl",
+      "bytes": 4578284,
+      "height": 20,
+      "number": 10,
+      "role": "divider",
+      "size": [
+        105.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/11.stl",
+      "bytes": 4931484,
+      "height": 20,
+      "number": 11,
+      "role": "divider",
+      "size": [
+        115.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/12.stl",
+      "bytes": 5411984,
+      "height": 20,
+      "number": 12,
+      "role": "divider",
+      "size": [
+        126.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/13.stl",
+      "bytes": 5756484,
+      "height": 20,
+      "number": 13,
+      "role": "divider",
+      "size": [
+        136.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/14, x4.stl",
+      "bytes": 6205284,
+      "height": 20,
+      "number": 14,
+      "role": "divider",
+      "size": [
+        147.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/15.stl",
+      "bytes": 6572284,
+      "height": 20,
+      "number": 15,
+      "role": "divider",
+      "size": [
+        157.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/16.stl",
+      "bytes": 7037784,
+      "height": 20,
+      "number": 16,
+      "role": "divider",
+      "size": [
+        168.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/17.stl",
+      "bytes": 7404684,
+      "height": 20,
+      "number": 17,
+      "role": "divider",
+      "size": [
+        178.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/18-M, x5.stl",
+      "bytes": 7871684,
+      "height": 20,
+      "number": 18,
+      "role": "divider",
+      "size": [
+        189.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/19.stl",
+      "bytes": 8261484,
+      "height": 20,
+      "number": 19,
+      "role": "divider",
+      "size": [
+        199.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/20.stl",
+      "bytes": 8763384,
+      "height": 20,
+      "number": 20,
+      "role": "divider",
+      "size": [
+        210.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/21.stl",
+      "bytes": 9137584,
+      "height": 20,
+      "number": 21,
+      "role": "divider",
+      "size": [
+        220.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/22, x6.stl",
+      "bytes": 9592384,
+      "height": 20,
+      "number": 22,
+      "role": "divider",
+      "size": [
+        231.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/23.stl",
+      "bytes": 9930484,
+      "height": 20,
+      "number": 23,
+      "role": "divider",
+      "size": [
+        241.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/24.stl",
+      "bytes": 10418584,
+      "height": 20,
+      "number": 24,
+      "role": "divider",
+      "size": [
+        252.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/25.stl",
+      "bytes": 10763484,
+      "height": 20,
+      "number": 25,
+      "role": "divider",
+      "size": [
+        262.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/26-L, x7.stl",
+      "bytes": 11271984,
+      "height": 20,
+      "number": 26,
+      "role": "divider",
+      "size": [
+        273.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/27.stl",
+      "bytes": 11662584,
+      "height": 20,
+      "number": 27,
+      "role": "divider",
+      "size": [
+        283.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/28.stl",
+      "bytes": 12111584,
+      "height": 20,
+      "number": 28,
+      "role": "divider",
+      "size": [
+        294.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/29.stl",
+      "bytes": 12455784,
+      "height": 20,
+      "number": 29,
+      "role": "divider",
+      "size": [
+        304.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/30.stl",
+      "bytes": 12945984,
+      "height": 20,
+      "number": 30,
+      "role": "divider",
+      "size": [
+        315.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/31.stl",
+      "bytes": 13302584,
+      "height": 20,
+      "number": 31,
+      "role": "divider",
+      "size": [
+        325.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/32-XL.stl",
+      "bytes": 13900184,
+      "height": 20,
+      "number": 32,
+      "role": "divider",
+      "size": [
+        336.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/5.stl",
+      "bytes": 2702084,
+      "height": 20,
+      "number": 5,
+      "role": "divider",
+      "size": [
+        52.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/6.stl",
+      "bytes": 3101184,
+      "height": 20,
+      "number": 6,
+      "role": "divider",
+      "size": [
+        63.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/7.stl",
+      "bytes": 3458184,
+      "height": 20,
+      "number": 7,
+      "role": "divider",
+      "size": [
+        73.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/8.stl",
+      "bytes": 3773584,
+      "height": 20,
+      "number": 8,
+      "role": "divider",
+      "size": [
+        84.0,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/9.stl",
+      "bytes": 4133084,
+      "height": 20,
+      "number": 9,
+      "role": "divider",
+      "size": [
+        94.5,
+        25.352,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/Rounded Edge Piece 20MM.stl",
+      "bytes": 523134,
+      "height": 20,
+      "number": null,
+      "role": "rounded",
+      "size": [
+        25.208,
+        27.499,
+        19.731
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/20MM TALL/Straight Edge Piece 20MM.stl",
+      "bytes": 1046184,
+      "height": 20,
+      "number": null,
+      "role": "straight",
+      "size": [
+        25.35,
+        20.201,
+        20.0
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/10-S, x3.stl",
+      "bytes": 5049984,
+      "height": 34.5,
+      "number": 10,
+      "role": "divider",
+      "size": [
+        105.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/11.stl",
+      "bytes": 5439984,
+      "height": 34.5,
+      "number": 11,
+      "role": "divider",
+      "size": [
+        115.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/12.stl",
+      "bytes": 5956084,
+      "height": 34.5,
+      "number": 12,
+      "role": "divider",
+      "size": [
+        126.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/13.stl",
+      "bytes": 6338284,
+      "height": 34.5,
+      "number": 13,
+      "role": "divider",
+      "size": [
+        136.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/14, x4.stl",
+      "bytes": 6837584,
+      "height": 34.5,
+      "number": 14,
+      "role": "divider",
+      "size": [
+        147.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/15.stl",
+      "bytes": 7247884,
+      "height": 34.5,
+      "number": 15,
+      "role": "divider",
+      "size": [
+        157.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/16.stl",
+      "bytes": 7727484,
+      "height": 34.5,
+      "number": 16,
+      "role": "divider",
+      "size": [
+        168.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/17.stl",
+      "bytes": 8146984,
+      "height": 34.5,
+      "number": 17,
+      "role": "divider",
+      "size": [
+        178.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/18-M, x5.stl",
+      "bytes": 8630584,
+      "height": 34.5,
+      "number": 18,
+      "role": "divider",
+      "size": [
+        189.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/19.stl",
+      "bytes": 9085684,
+      "height": 34.5,
+      "number": 19,
+      "role": "divider",
+      "size": [
+        199.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/20.stl",
+      "bytes": 9630284,
+      "height": 34.5,
+      "number": 20,
+      "role": "divider",
+      "size": [
+        210.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/21.stl",
+      "bytes": 9959184,
+      "height": 34.5,
+      "number": 21,
+      "role": "divider",
+      "size": [
+        220.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/22, x6.stl",
+      "bytes": 10532984,
+      "height": 34.5,
+      "number": 22,
+      "role": "divider",
+      "size": [
+        231.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/23.stl",
+      "bytes": 10925284,
+      "height": 34.5,
+      "number": 23,
+      "role": "divider",
+      "size": [
+        241.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/24.stl",
+      "bytes": 11380184,
+      "height": 34.5,
+      "number": 24,
+      "role": "divider",
+      "size": [
+        252.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/25.stl",
+      "bytes": 11812784,
+      "height": 34.5,
+      "number": 25,
+      "role": "divider",
+      "size": [
+        262.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/26-L, x7.stl",
+      "bytes": 12296384,
+      "height": 34.5,
+      "number": 26,
+      "role": "divider",
+      "size": [
+        273.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/27.stl",
+      "bytes": 12726184,
+      "height": 34.5,
+      "number": 27,
+      "role": "divider",
+      "size": [
+        283.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/28.stl",
+      "bytes": 13204184,
+      "height": 34.5,
+      "number": 28,
+      "role": "divider",
+      "size": [
+        294.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/29.stl",
+      "bytes": 13589784,
+      "height": 34.5,
+      "number": 29,
+      "role": "divider",
+      "size": [
+        304.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/30.stl",
+      "bytes": 14103784,
+      "height": 34.5,
+      "number": 30,
+      "role": "divider",
+      "size": [
+        315.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/31.stl",
+      "bytes": 14495384,
+      "height": 34.5,
+      "number": 31,
+      "role": "divider",
+      "size": [
+        325.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/32-XL.stl",
+      "bytes": 15128784,
+      "height": 34.5,
+      "number": 32,
+      "role": "divider",
+      "size": [
+        336.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/5.stl",
+      "bytes": 3008584,
+      "height": 34.5,
+      "number": 5,
+      "role": "divider",
+      "size": [
+        52.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/6.stl",
+      "bytes": 3442684,
+      "height": 34.5,
+      "number": 6,
+      "role": "divider",
+      "size": [
+        63.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/7.stl",
+      "bytes": 3839884,
+      "height": 34.5,
+      "number": 7,
+      "role": "divider",
+      "size": [
+        73.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/8.stl",
+      "bytes": 4184784,
+      "height": 34.5,
+      "number": 8,
+      "role": "divider",
+      "size": [
+        84.0,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/9.stl",
+      "bytes": 4587084,
+      "height": 34.5,
+      "number": 9,
+      "role": "divider",
+      "size": [
+        94.5,
+        25.352,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/Rounded Edge Piece 1F.stl",
+      "bytes": 637834,
+      "height": 34.5,
+      "number": null,
+      "role": "rounded",
+      "size": [
+        25.207,
+        27.499,
+        34.231
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/34.5MM TALL (full height of 1F drawers)/Straight Edge Piece 1F.stl",
+      "bytes": 871584,
+      "height": 34.5,
+      "number": null,
+      "role": "straight",
+      "size": [
+        25.35,
+        20.201,
+        34.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/10-S, x3.stl",
+      "bytes": 7021184,
+      "height": 82.5,
+      "number": 10,
+      "role": "divider",
+      "size": [
+        105.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/11.stl",
+      "bytes": 7488784,
+      "height": 82.5,
+      "number": 11,
+      "role": "divider",
+      "size": [
+        115.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/12.stl",
+      "bytes": 8135084,
+      "height": 82.5,
+      "number": 12,
+      "role": "divider",
+      "size": [
+        126.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/13.stl",
+      "bytes": 8619884,
+      "height": 82.5,
+      "number": 13,
+      "role": "divider",
+      "size": [
+        136.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/14, x4.stl",
+      "bytes": 9259484,
+      "height": 82.5,
+      "number": 14,
+      "role": "divider",
+      "size": [
+        147.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/15.stl",
+      "bytes": 9815584,
+      "height": 82.5,
+      "number": 15,
+      "role": "divider",
+      "size": [
+        157.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/16.stl",
+      "bytes": 10453484,
+      "height": 82.5,
+      "number": 16,
+      "role": "divider",
+      "size": [
+        168.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/17.stl",
+      "bytes": 10852184,
+      "height": 82.5,
+      "number": 17,
+      "role": "divider",
+      "size": [
+        178.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/18-M, x5.stl",
+      "bytes": 11455484,
+      "height": 82.5,
+      "number": 18,
+      "role": "divider",
+      "size": [
+        189.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/19.stl",
+      "bytes": 12136584,
+      "height": 82.5,
+      "number": 19,
+      "role": "divider",
+      "size": [
+        199.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/20.stl",
+      "bytes": 12796184,
+      "height": 82.5,
+      "number": 20,
+      "role": "divider",
+      "size": [
+        210.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/21.stl",
+      "bytes": 13084384,
+      "height": 82.5,
+      "number": 21,
+      "role": "divider",
+      "size": [
+        220.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/22, x6.stl",
+      "bytes": 13832584,
+      "height": 82.5,
+      "number": 22,
+      "role": "divider",
+      "size": [
+        231.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/23.stl",
+      "bytes": 14335084,
+      "height": 82.5,
+      "number": 23,
+      "role": "divider",
+      "size": [
+        241.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/24.stl",
+      "bytes": 14885084,
+      "height": 82.5,
+      "number": 24,
+      "role": "divider",
+      "size": [
+        252.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/25.stl",
+      "bytes": 15380784,
+      "height": 82.5,
+      "number": 25,
+      "role": "divider",
+      "size": [
+        262.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/26-L, x7.stl",
+      "bytes": 15962284,
+      "height": 82.5,
+      "number": 26,
+      "role": "divider",
+      "size": [
+        273.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/27.stl",
+      "bytes": 16502184,
+      "height": 82.5,
+      "number": 27,
+      "role": "divider",
+      "size": [
+        283.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/28.stl",
+      "bytes": 17078184,
+      "height": 82.5,
+      "number": 28,
+      "role": "divider",
+      "size": [
+        294.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/29.stl",
+      "bytes": 17562784,
+      "height": 82.5,
+      "number": 29,
+      "role": "divider",
+      "size": [
+        304.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/30.stl",
+      "bytes": 18180784,
+      "height": 82.5,
+      "number": 30,
+      "role": "divider",
+      "size": [
+        315.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/31.stl",
+      "bytes": 18677884,
+      "height": 82.5,
+      "number": 31,
+      "role": "divider",
+      "size": [
+        325.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/32-XL.stl",
+      "bytes": 19403984,
+      "height": 82.5,
+      "number": 32,
+      "role": "divider",
+      "size": [
+        336.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/5.stl",
+      "bytes": 4445384,
+      "height": 82.5,
+      "number": 5,
+      "role": "divider",
+      "size": [
+        52.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/6.stl",
+      "bytes": 4976884,
+      "height": 82.5,
+      "number": 6,
+      "role": "divider",
+      "size": [
+        63.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/7.stl",
+      "bytes": 5488584,
+      "height": 82.5,
+      "number": 7,
+      "role": "divider",
+      "size": [
+        73.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/8.stl",
+      "bytes": 5922584,
+      "height": 82.5,
+      "number": 8,
+      "role": "divider",
+      "size": [
+        84.0,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/9.stl",
+      "bytes": 6437084,
+      "height": 82.5,
+      "number": 9,
+      "role": "divider",
+      "size": [
+        94.5,
+        25.352,
+        82.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/Rounded Edge Piece 2F.stl",
+      "bytes": 1104884,
+      "height": 82.5,
+      "number": null,
+      "role": "rounded",
+      "size": [
+        25.207,
+        27.499,
+        81.231
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/82.5MM TALL (full height of 2F drawers)/Straight Edge Piece 2F.stl",
+      "bytes": 1281684,
+      "height": 82.5,
+      "number": null,
+      "role": "straight",
+      "size": [
+        25.35,
+        20.201,
+        81.5
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/grid divider pin_loose.stl",
+      "bytes": 130784,
+      "height": null,
+      "number": null,
+      "role": "loose",
+      "size": [
+        6.0,
+        13.851,
+        4.901
+      ]
+    },
+    {
+      "path": "01. DRAWERS/07. Universal/Grid Dividers/grid divider pin_tight.stl",
+      "bytes": 135084,
+      "height": null,
+      "number": null,
+      "role": "tight",
+      "size": [
+        6.0,
+        13.851,
+        4.901
+      ]
+    }
+  ]
+}

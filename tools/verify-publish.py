@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory(prefix='vault-release-') as folder:
     real_git('commit', '-qm', 'Initial backup')
     real_git('push', '-u', 'origin', 'main')
     (work / 'dist').mkdir()
-    for name in ('index.html', 'workbench.html'):
+    for name in ('index.html', 'workbench.html', 'dividers.html'):
         (work / 'dist' / name).write_text('<span class="site-version">V1.0</span>')
     (work / 'VERSION.json').write_text('{"version":"1.0"}\n')
     fail_push = False
@@ -49,7 +49,7 @@ with tempfile.TemporaryDirectory(prefix='vault-release-') as folder:
     with patch.object(release, 'git', test_git), patch.object(release, 'set_version', lambda v: set_version(v, work)):
         release.publish('First release')
         assert published() == '1.0'
-        for name in ('index.html', 'workbench.html'):
+        for name in ('index.html', 'workbench.html', 'dividers.html'):
             assert '>V1.0<' in (work / 'dist' / name).read_text()
         (work / 'README.md').write_text('Second release\n')
         release.publish()

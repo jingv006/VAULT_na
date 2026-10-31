@@ -1,3 +1,5 @@
+import {moduleExport} from './module-export.mjs?revision=module-export-1';
+import {stackDimensions} from './stack-dimensions.mjs?revision=stack-dimensions-1';
 import {newFoundationIssue} from './foundation.mjs?revision=foundation-1';
 import {constrainLayout,constrainedInsert} from './constraints.mjs?revision=foundation-1';
 import {COLOUR_SLOTS,DEFAULT_COLOURS,PASTEL_COLOURS,PREVIEW_KEY,readPalette,writePalette,watchPalette,previewPalette,contrastColour,mixColour} from './palette-store.mjs?revision=shared-palette-1';
@@ -64,6 +66,7 @@ async function refreshEstimates(){
  if(!estimates?.summary?.complete)estimateTimer=setTimeout(refreshEstimates,15000);
 }
 
+let measurements={records:{}};
 let estimates=null,estimateTimer,stack3d,stack3dLoading,canvasMode='2d',previewAvailable=false;
 let committedState=null,checkpointBackup=null;
 let roofEntries=[],cat,lookup,fileMeta,state,selected=null,local=false,linkedFiles=new Map(),kind='drawer',family='all',height='all',depth='3',view='front',dims=true,magnet=true,history=[],future=[],drag=null,box=[-120,-480,650,570],homeBox=[-120,-480,650,570],bomTab='parts',toastTimer,exporting=false;
@@ -102,7 +105,7 @@ async function refreshStack3D(){
  if(canvasMode!=='3d')return;
  try{
   if(!stack3d){
-   stack3dLoading??=import('./stack-viewer.mjs?revision=exterior-1').catch(error=>{stack3dLoading=null;throw error;});
+   stack3dLoading??=import('./stack-viewer.mjs?revision=stack-dimensions-1').catch(error=>{stack3dLoading=null;throw error;});
    const {StackViewer}=await stack3dLoading;if(canvasMode!=='3d')return;
    stack3d??=new StackViewer($('workbench3d'));
   }
@@ -231,7 +234,16 @@ function scene(exportMode=false){
  if(dims&&state.items.length){s+=dimension(b.x,33,b.x+b.width,33,fmt(b.width)+' mm');s+=dimension(b.x-30,0,b.x-30,-dH,fmt(dH)+' mm',true);}
  return s;
 }
-function draw(){if(!cat)return;$('canvasWrap').dataset.colourMode=colourMode;$('canvas').setAttribute('viewBox',box.join(' '));$('canvas').innerHTML=scene();$('emptyCanvas').hidden=state.items.length>0;}
+function renderAssemblyDimensions(){
+ const result=stackDimensions(state.items,cat,measurements);
+ for(const [index,id] of ['assemblyLength','assemblyDepth','assemblyHeight'].entries()){
+  const text=result.external?fmt(result.external[index]):'—';if($(id).textContent!==text)$(id).textContent=text;
+ }
+ $('assemblyNominal').textContent='名义拼接：'+result.nominal.map(fmt).join(' × ')+' mm';
+ $('assemblyDimensionNote').textContent=!state.items.length?'添加模块后计算闭合装配外尺寸':result.missing.length?result.missing.length+' 个模块待校验；载入 3D 预览后补充，暂不以名义尺寸替代':'闭合外尺寸估算 · 含所选外露顶盖、旋钮和锁扣；不计备用件及开合空间';
+}
+
+function draw(){if(!cat)return;renderAssemblyDimensions();$('canvasWrap').dataset.colourMode=colourMode;$('canvas').setAttribute('viewBox',box.join(' '));$('canvas').innerHTML=scene();$('emptyCanvas').hidden=state.items.length>0;}
 function outsideView(){const b=bounds(state.items,lookup);return b.x-45<box[0]||b.x+b.width+30>box[0]+box[2]||-b.y-b.height-30<box[1]||65>box[1]+box[3];}
 function fit(){
  if(canvasMode==='3d'){stack3d?.fitCamera();return;}
@@ -264,25 +276,39 @@ function exportSVG(){const b=bounds(state.items,lookup),w=Math.max(b.width+130,5
 function exportCSV(){const b=makeBOM(state,cat);return csv([['中文部件名称','原文件名','STL 打印份数','用途','原始路径','单份耗材g','单份时间秒','合计耗材g','合计时间秒','切片状态','说明','STL实际外形mm','检查打印机','打印机范围mm','尺寸检查'],...b.parts.map(p=>{const r=estimates?.records?.[p.path],known=r?.status==='ok';return [partName(p),p.name,p.qty,p.role,p.path,known?r.grams:'',known?r.seconds:'',known?(r.grams*p.qty).toFixed(2):'',known?r.seconds*p.qty:'',estimateState(p.path),[p.note,r?.estimateOnly?r.envelopeNote:'',r?.generatedSupports?r.supportNote:r?.needsSupport?'文件标注需支撑，当前未计额外支撑':'',r?.materialMismatch?'TPU 专用件按 PLA 估算':''].filter(Boolean).join('；'),dimensionsText(geometry?.records?.[p.path]?.size),chosenPrinter()?chosenPrinter().brand+' '+chosenPrinter().name:'',dimensionsText(chosenPrinter()?.volume),fitLabel(fitPart(p.path,chosenPrinter(),geometry,printerSettings).status)];})]);}
 function estimateSnapshot(bom){return {profile:estimates?.profile||null,updatedAt:estimates?.updatedAt||null,summary:estimateFor(bom),printerCompatibility:{checkedAt:printerData?.checkedAt,settings:{...printerSettings},result:compatibility(bom)},parts:bom.parts.map(p=>({path:p.path,qty:p.qty,estimate:estimates?.records?.[p.path]||null}))};}
 function showExport(){if(!state.items.length&&!state.extras.length)return toast('请先添加模块或配件');if(!$('exportDialog').open)$('exportDialog').showModal();renderExport();}
-function renderExport(){const b=makeBOM(state,cat),copies=$$('input[name=exportMode]').find(r=>r.checked).value==='copies',w=validate(state.items,lookup);$('exportSummary').textContent=`${b.parts.length} 种模型 · ${b.copies} 份 STL · ${estimateText(estimateFor(b))}`;$('exportSize').textContent='预计模型体积 '+size(local?(copies?b.copyBytes:b.bytes):sourceBytes(b,copies));$('exportDocs').textContent=local?'本机版同时附带目录内原版 PDF 装配说明。':'已连接的原版 PDF 装配说明也会随包附带。';$('exportConnection').hidden=local||linkedFiles.size>0;$('exportWarning').hidden=!w.length;$('exportWarning').textContent=`当前有 ${w.length} 处布局提示。可以先在“打印清单 → 布局检查”核对，也可按当前布局导出。`;$('connectExport').hidden=local;$('startExport').disabled=exporting||!b.parts.length;$('connectExport').disabled=exporting;$('startExport').textContent=exporting?'正在打包…':'生成 ZIP ↓';$$('input[name=exportMode]').forEach(r=>r.disabled=exporting);}
+function renderExport(){
+ const b=makeBOM(state,cat),kits=$$('input[name=exportMode]').find(r=>r.checked).value==='kits',w=validate(state.items,lookup);
+ let packagePlan,error='';if(kits)try{packagePlan=moduleExport(state,cat,customColours);}catch(e){error=e.message;}
+ if(kits&&!local)error='整合 3MF 需通过项目内“启动工作台.command”打开本机服务生成；第一项可直接读取浏览器所选目录打包 STL。';
+ if(kits&&!state.items.length)error='先添加组合模块后可输出整合 3MF；仅有备用件时请使用第一项。';
+ $('exportSummary').textContent=`${b.parts.length} 种模型 · ${b.copies} 份 STL · ${estimateText(estimateFor(b))}`;
+ $('exportSize').textContent=kits?(packagePlan?`${packagePlan.groups.length} 份整合工程 · 共打印 ${packagePlan.count} 套；体积生成后显示`:'按完整模块配方生成 3MF'):'预计模型体积 '+size(local?b.bytes:sourceBytes(b,false));
+ $('exportModelType').textContent=kits?'整合 3MF（备用件另附 STL）':'STL 模型';
+ $('exportKitNote').hidden=!kits;$('exportKitNote').textContent=error||'例如 3 套相同 S3F1 配方 → 一份 __print-3.3mf，工程内保留一套零件。顶盖与配件组合不同会分开；使用自定义配色，与尺寸总览同步。';
+ $('exportDocs').textContent=local?'本机版同时附带目录内原版 PDF 装配说明。':'已连接的原版 PDF 装配说明也会随包附带。';
+ $('exportConnection').hidden=local||linkedFiles.size>0;$('exportWarning').hidden=!w.length;$('exportWarning').textContent=`当前有 ${w.length} 处布局提示。可以先在“打印清单 → 布局检查”核对，也可按当前布局导出。`;
+ $('connectExport').hidden=local;$('startExport').disabled=exporting||!b.parts.length||!!error;$('connectExport').disabled=exporting;$('startExport').textContent=exporting?'正在打包…':'生成 ZIP ↓';$$('input[name=exportMode]').forEach(r=>r.disabled=exporting);
+}
+
 function progress(n,total,name){$('progressBar').style.width=Math.min(100,100*n/Math.max(1,total))+'%';$('progressText').textContent=`${size(n)} / ${size(total)} · ${name||''}`;}
 async function performExport(){
- if(exporting)return;const b=makeBOM(state,cat),copies=$$('input[name=exportMode]').find(r=>r.checked).value==='copies';
+ if(exporting)return;const b=makeBOM(state,cat),kits=$$('input[name=exportMode]').find(r=>r.checked).value==='kits',copies=false;
+ let packagePlan;if(kits)try{if(!local)throw Error('整合 3MF 需通过本机启动服务生成');packagePlan=moduleExport(state,cat,customColours);}catch(error){toast(error.message);return;}
  if(!local&&!linkedFiles.size){$('folderInput').click();return;}
  // Validate every file before opening the save dialog or writing any bytes.
  const entries=packEntries(b,copies);
  if(!local){const missing=b.parts.filter(p=>!linkedFiles.has(p.path));if(missing.length){$('exportConnection').hidden=false;$('exportConnection').textContent=`所选文件夹缺少 ${missing.length} 个模型，例如 ${missing[0].path}。请选择包含该相对路径的完整模型根目录；外层文件夹可任意命名，只需保留内部文件树。`;return;}}
- const snapshot=JSON.parse(JSON.stringify(state)),svg=exportSVG();let writable=null;
+ const snapshot=JSON.parse(JSON.stringify(state)),svg=exportSVG();let writable=null,finishedBytes=null;
  try{
   if(!local&&window.showSaveFilePicker){const handle=await showSaveFilePicker({suggestedName:planName()+'.zip',types:[{description:'ZIP 压缩包',accept:{'application/zip':['.zip']}}]});writable=await handle.createWritable();}
   const total=local?(copies?b.copyBytes:b.bytes):sourceBytes(b,copies);
   if(!local&&!writable&&total>400e6)throw Error('当前浏览器不支持直接写入大文件。请使用 Chrome / Edge，或运行项目内“启动工作台.command”后打包。');
   exporting=true;renderExport();$('exportProgress').hidden=false;progress(0,total,'准备文件');
   if(local){
-   const r=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parts:b.parts.map(p=>({path:p.path,qty:p.qty,note:p.note})),copies,plan:snapshot,hardware:b.hardware,svg,estimate:estimateSnapshot(b),manifestCSV:exportCSV()})});const j=await r.json();if(!r.ok)throw Error(j.error||'打包失败');
+   const r=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parts:b.parts.map(p=>({path:p.path,qty:p.qty,note:p.note})),copies,...(kits?{mode:'kits',kitGroups:packagePlan.groups,extraParts:packagePlan.extras}:{}),plan:snapshot,hardware:b.hardware,svg,estimate:estimateSnapshot(b),manifestCSV:exportCSV()})});const j=await r.json();if(!r.ok)throw Error(j.error||'打包失败');
    let result;
-   while(true){await new Promise(r=>setTimeout(r,500));const res=await fetch('/api/job/'+j.id);result=await res.json();if(result.status==='error')throw Error(result.error);progress(result.done,result.total,result.current);if(result.status==='done')break;}
-   const a=document.createElement('a');a.href=result.download;a.download=planName()+'.zip';a.click();progress(result.total,result.total,'打包完成，已开始下载');
+   while(true){await new Promise(r=>setTimeout(r,500));const res=await fetch('/api/job/'+j.id);result=await res.json();if(result.status==='error')throw Error(result.error);if(result.unit==='kits'){$('progressBar').style.width=(100*result.done/Math.max(1,result.total))+'%';$('progressText').textContent=`${result.done}/${result.total} 份 3MF · ${result.current||'准备工程'}`;}else progress(result.done,result.total,result.current);if(result.status==='done')break;}
+   finishedBytes=result.size;const a=document.createElement('a');a.href=result.download;a.download=planName()+'.zip';a.click();progress(result.total,result.total,'打包完成，已开始下载');
   }else{
    const extras=[{name:'打印机适配.json',data:JSON.stringify(estimateSnapshot(b).printerCompatibility,null,2)},{name:'layout.vault.json',data:JSON.stringify(snapshot,null,2)},{name:'耗材时间估算.json',data:JSON.stringify(estimateSnapshot(b),null,2)},{name:'打印清单.csv',data:exportCSV()},{name:'紧固件.csv',data:csv([['名称','数量'],...b.hardware.map(h=>[h.name,h.qty])])},{name:'组合预览.svg',data:svg},{name:'README.txt',data:'VAULT 模型清单\nprint-N 表示该 STL 文件所需打印份数。套件文件可能包含多个零件。\n二维图仅用于布局与数量核对；实际装配请对照原版说明。\n配方打印数量可在工作台手动调整。'}];
    const sources=entries.map(e=>{const f=linkedFiles.get(e.path);return {name:e.name,size:f.size,stream:()=>f.stream()};});
@@ -292,7 +318,7 @@ async function performExport(){
   }
   toast('模型已按打印数量整理打包');
  }catch(e){if(writable)await writable.abort().catch(()=>{});if(e.name!=='AbortError'){toast(e.message);$('progressText').textContent=e.message;}}
- finally{exporting=false;renderExport();}
+ finally{exporting=false;renderExport();if(kits&&finishedBytes)$('exportSize').textContent='整合压缩包 '+size(finishedBytes);}
 }
 function positionRandomMenu(){
  const menu=$('randomLayoutMenu');if(menu.hidden)return;
@@ -408,6 +434,13 @@ async function init(){try{const r=await fetch('catalog.json?revision=aligned-hol
  $('projectTitle').value=state.title;
  try{const responses=await Promise.all([fetch('printers.json?revision=other-printers-1',{cache:'no-store'}),fetch('geometry.json')]);if(responses.some(r=>!r.ok))throw Error('打印机数据不可用');[printerData,geometry]=await Promise.all(responses.map(r=>r.json()));if(printerSettings.id!=='custom'&&!printerData.printers.some(p=>p.id===printerSettings.id))printerSettings.id='h2d';printerSettings.margin=[0,3,5].includes(printerSettings.margin)?printerSettings.margin:0;printerSettings.reorient=printerSettings.reorient===true;$('printerSelect').innerHTML=printerGroups().map(brand=>`<optgroup label="${esc(brand)}">${printerData.printers.filter(p=>printerGroup(p)===brand).map(p=>`<option value="${p.id}">${esc(printerLabel(p))}</option>`).join('')}</optgroup>`).join('')+'<optgroup label="自定义"><option value="custom">自定义打印机</option></optgroup>';$('printerSelect').value=printerSettings.id;syncCustomPrinterInputs();$('printerMargin').value=printerSettings.margin;$('printerReorient').checked=printerSettings.reorient;}catch(e){toast(e.message);}
  try{const res=await fetch('/api/status');if(res.ok){const status=await res.json();local=status.local&&status.ready;previewAvailable=local;}}catch{}
+ try{const response=await fetch('measurements.json?revision=stack-dimensions-1',{cache:'no-store'});if(response.ok)measurements=await response.json();}catch{}
+ $('workbench3d').addEventListener('stack-measured',async event=>{
+  try{const {measureAssembly}=await import('./assembly-measurements.mjs?revision=stack-dimensions-1');
+   for(const entry of event.detail)measurements.records[entry.model.id+'|'+entry.roof]=measureAssembly(entry.model,entry.parts);
+   renderAssemblyDimensions();
+  }catch{}
+ });
  await refreshEstimates();bind();renderLibrary();connectionUI();const aligned=constrainLayout(state.items,lookup);if(JSON.stringify(aligned)!==JSON.stringify(state.items)){checkpoint();state.items=aligned;toast('已按强吸附整理当前层位，可撤销');}update({refit:true});window.VaultWorkbench={getState:()=>structuredClone(state),getCatalog:()=>cat,getBOM:()=>makeBOM(state,cat),getWarnings:()=>validate(state.items,lookup),getEstimate:()=>estimateFor(makeBOM(state,cat)),getPrinterReport:()=>compatibility(makeBOM(state,cat)),getPrinters:()=>printerData,getGeometry:()=>geometry};
  const requestedKit=new URLSearchParams(location.search).get('kit');if(requestedKit&&lookup[requestedKit]){addModel(requestedKit);window.history.replaceState(null,'','workbench.html');}
  }catch(e){$('modelList').innerHTML='<div class="empty">'+esc(e.message)+'<br>请通过本地服务或在线地址打开工作台。</div>';toast(e.message);}}

@@ -1,4 +1,4 @@
-"""Single version source and synchronized header badges for both pages."""
+"""Single version source and synchronized header badges for all pages."""
 import json
 import re
 from pathlib import Path
@@ -19,8 +19,10 @@ def set_version(version, base=BASE):
     if not re.fullmatch(r'\d+\.\d+', version):
         raise ValueError('版本号必须采用 主版本.次版本 格式')
     updates = []
-    for name in ('index.html', 'workbench.html'):
+    for name in ('index.html', 'workbench.html', 'dividers.html'):
         path = base / 'dist' / name
+        if name == 'dividers.html' and not path.exists():
+            continue
         text, count = re.subn(
             r'(<span class="site-version"[^>]*>)V\d+\.\d+(</span>)',
             lambda match: match[1] + 'V' + version + match[2],

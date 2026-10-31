@@ -60,7 +60,7 @@ export class StackViewer{
   if(key===this.key)return;this.key=key;const token=++this.token;
   this.host.dataset.previewState='loading';this.host.dataset.moduleCount='0';this.status.hidden=false;this.status.replaceChildren();this.status.textContent='正在按当前布局装配真实模型…';this.root.visible=false;this.dirty=true;
   if(!entries.length){this.clear();this.paintModules();this.host.dataset.layout='[]';this.host.dataset.loadedRoles='[]';this.host.dataset.meshCount='0';this.host.dataset.detail='exterior';this.status.textContent='从左侧添加模块后，可在这里查看三维组合。';this.summary.textContent='暂无模块';this.host.dataset.previewState='empty';return;}
-  const assembled=[];
+  const assembled=[],measured=[];
   try{
    const loaded=new Map(),activeURLs=new Set();
    for(let index=0;index<entries.length;index++){
@@ -75,7 +75,7 @@ export class StackViewer{
     const body=parts.find(p=>['柜体','箱体'].includes(p.role));module.root.position.set(...stackModulePosition(entry,body.asset.size[1]));module.root.userData={id:entry.id,model:entry.model.id,roof:entry.options.roof};
     // Per-module clipping planes use world coordinates in the combined scene.
     for(const clip of module.keyClips)clip.plane.constant+=module.root.position.y;
-    assembled.push(module);
+    assembled.push(module);measured.push({model:entry.model,roof:entry.options.roof,parts});
    }
    if(token!==this.token){for(const module of assembled)module.clear();return;}
    this.clear();this.modules=assembled;for(const module of assembled)this.root.add(module.root);
@@ -83,6 +83,7 @@ export class StackViewer{
    this.host.dataset.loadedRoles=JSON.stringify([...new Set(assembled.flatMap(module=>module.moves.map(move=>move.mesh.userData.role)))]);
    this.host.dataset.meshCount=String(assembled.reduce((count,module)=>count+module.moves.length,0));
    this.host.dataset.layout=JSON.stringify(assembled.map(module=>({id:module.root.userData.id,model:module.m.id,position:module.root.position.toArray(),roof:module.root.userData.roof})));
+   this.host.dispatchEvent?.(new CustomEvent('stack-measured',{detail:measured}));
    this.summary.textContent=`${assembled.length} 个模块 · 仅加载外观零件`;
    this.fitCamera(!this.hasView);this.hasView=true;this.dirty=true;
   }catch(error){

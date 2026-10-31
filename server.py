@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import urlparse,unquote
 import argparse,json,threading,uuid,zipfile,csv,io,time,shutil,os
 import kit_service
+import workbench_export
 import preview_service
 BASE=Path(__file__).resolve().parent
 LIB=BASE.parent/'261021_VAULT_USSA_S'
@@ -26,8 +27,12 @@ def run_export(jobid,payload):
   for old in EXPORT.glob('*'):
    if old.is_file() and time.time()-old.stat().st_mtime>86400:old.unlink()
   rows=payload['parts'];copies=payload.get('copies',False)
-  total=sum(FILES[r['path']]['bytes']*(r['qty'] if copies else 1) for r in rows)
-  job.update(total=total,done=0,status='writing')
+  projects=[];stl_rows=rows
+  if payload.get('mode')=='kits':
+   groups,stl_rows=workbench_export.validate(payload)
+   projects=workbench_export.prepare(groups,job);copies=False
+  total=sum(FILES[r['path']]['bytes']*(r['qty'] if copies else 1) for r in stl_rows)+sum(p['target'].stat().st_size for p in projects)
+  job.update(total=total,done=0,status='writing',phase='zip',unit='bytes')
   with zipfile.ZipFile(partial,'w',compression=zipfile.ZIP_STORED,allowZip64=True) as z:
    z.writestr('layout.vault.json',json.dumps(payload['plan'],ensure_ascii=False,indent=2))
    out=io.StringIO();writer=csv.writer(out);writer.writerow(['部件','打印份数','每份字节','源文件相对路径','备注'])
@@ -40,7 +45,18 @@ def run_export(jobid,payload):
    z.writestr('hardware.json',json.dumps(payload.get('hardware',[]),ensure_ascii=False,indent=2))
    z.writestr('README.txt','VAULT 工作台导出\nprint-N 为该 STL 所需打印份数，不是三角网格数量。\n源文件可能包含多个零件（例如 Springs 为一对）。\n名义尺寸与二维布局仅用于规划，不验证承重、公差或锁扣连接。\n请对照原版装配说明核对打印方向、支撑与紧固件。\n配方数量可在网页打印清单中调整。\n')
    if payload.get('svg'):z.writestr('组合预览.svg',payload['svg'])
-   for r in rows:
+   if projects:
+    z.writestr('模块打印清单.csv',workbench_export.manifest(projects))
+    z.writestr('模块工程.json',json.dumps([{k:v for k,v in p.items() if k!='target'} for p in projects],ensure_ascii=False,indent=2))
+    z.writestr('3MF打印说明.txt','每份 3MF 只含一套模块所需零件；文件名 __print-N 表示整份工程要打印 N 套。\n相同型号的顶盖、配件配置不同，会分别输出。被上层覆盖的抽屉不含顶盖。\n3MF 使用工作台自定义配色（与尺寸总览同步），浅色预览不影响导出。\n备用件以 STL 单独附带，STL 文件名 print-N 表示该 STL 的打印份数。\n3MF 未切片，请在切片器核对材料、方向、支撑和打印机范围。\n')
+    for project in projects:
+     job['current']=project['name']
+     with project['target'].open('rb') as source,z.open(project['name'],'w',force_zip64=True) as dest:
+      while True:
+       data=source.read(1024*1024)
+       if not data:break
+       dest.write(data);job['done']+=len(data)
+   for r in stl_rows:
     p=secure_file(r['path']);qty=r['qty'];folder=Path(r['path']).parent.as_posix()
     for n in range(qty if copies else 1):
      name=f'STL/{folder}/{p.stem}__'+(f'{n+1}-of-{qty}' if copies else f'print-{qty}')+'.stl'
@@ -122,6 +138,8 @@ class Handler(SimpleHTTPRequestHandler):
     seen.add(r['path']);secure_file(r['path'])
     if type(r['qty']) is not int or not 1<=r['qty']<=999:raise ValueError('Invalid quantity')
    if not isinstance(p.get('plan'),dict):raise ValueError('Missing plan')
+   if p.get('mode') not in (None,'kits'):raise ValueError('打包模式无效')
+   if p.get('mode')=='kits':workbench_export.validate(p)
    size=sum(FILES[r['path']]['bytes']*(r['qty'] if p.get('copies') else 1) for r in rows)
    if size>shutil.disk_usage(BASE).free-100_000_000:raise ValueError('磁盘剩余空间不足')
    ident=uuid.uuid4().hex;JOBS[ident]={'id':ident,'status':'queued','done':0,'total':size}

@@ -40,3 +40,19 @@
 /* Additional manufacturers share one catalog column; custom stays above. */
 @media(min-width:801px){.printer-matrix{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
 @media(min-width:801px) and (max-width:1000px){.printer-matrix{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.assembly-dimensions{position:absolute;top:52px;left:23px;z-index:1;width:155px;padding:13px 14px 11px;background:#fcfdf9ed;border:1px solid #e1e7d8;border-radius:9px;pointer-events:none;color:#667e56;box-shadow:0 2px 8px #40513205}
+.assembly-dimensions h2{font-size:10px;font-weight:500;margin:0 0 11px;color:#7e9170}
+.assembly-dimensions dl{margin:0;display:grid;gap:9px}
+.assembly-dimensions dl>div{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.assembly-dimensions dt{font-size:10px;color:#8b9b7e;white-space:nowrap}
+.assembly-dimensions dt>span{font-size:8px;color:#a0ad94}
+.assembly-dimensions dd{margin:0;display:flex;align-items:baseline;gap:4px}
+.assembly-dimensions dd strong{font-size:17px;line-height:1.2;font-weight:500;letter-spacing:-.5px;color:#526d43;font-variant-numeric:tabular-nums}
+.assembly-dimensions dd>span{font-size:8px;color:#98a88b}
+.assembly-dimensions p{margin:11px 0 0;padding-top:8px;border-top:1px solid #e9eddf;font-size:7px;line-height:1.6;color:#a0ad94;white-space:normal}
+.canvas-wrap.is-3d>.assembly-dimensions{top:72px;z-index:3}
+@media(max-width:800px){.assembly-dimensions{left:15px;top:46px;width:140px;padding:11px}.assembly-dimensions dd strong{font-size:16px}.assembly-dimensions dl{gap:7px}.assembly-dimensions h2{margin-bottom:9px}.canvas-wrap.is-3d>.assembly-dimensions{top:67px}}
+@media(max-width:570px){.assembly-dimensions{width:126px;padding:10px}.assembly-dimensions dt>span{display:none}.assembly-dimensions p{font-size:6px}.assembly-dimensions dd strong{font-size:15px}}
+
+.assembly-dimensions .assembly-nominal{border-top:0;padding-top:0;margin-top:6px;font-variant-numeric:tabular-nums}

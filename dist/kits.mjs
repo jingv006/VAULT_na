@@ -2,10 +2,11 @@ import {makeBOM,estimateBOM,csv} from './core.mjs?revision=flip-roof-load-2';
 import {partName} from './i18n.mjs';
 import {printerBOM} from './printers.mjs';
 import {kitPreview} from './kit-preview.mjs?revision=flip-roof-load-2';
-import {KitDisplay} from './kit-display.mjs?revision=xl-drawers-1';
+import {KitDisplay} from './kit-display.mjs?revision=measured-dimensions-1';
 import {roofChoices,selectedRoof} from './roof-options.mjs?revision=flip-roof-load-2';
 import {matchModelDirectory} from './local-models.mjs?revision=directory-tree-2';
 import {readPalette,writePalette,watchPalette,DEFAULT_COLOURS} from './palette-store.mjs?revision=shared-palette-1';
+let measurements={records:{}};
 let viewer,selectedFiles=new Map(),fileURLs=new Map();
 function localFileURL(path){
  const file=selectedFiles.get(path);if(!file)return null;
@@ -51,7 +52,7 @@ function renderDetail(){
  const m=model();options.roof=selectedRoof(m,options.roof);
  const b=bom(),e=estimateBOM(b,estimates),rows=colouredRows(),fit=printerBOM(b,printers.printers.find(p=>p.id==='h2d'),geometry);
  $('kitName').textContent=code(m)+(m.variant==='twin'?' · 双抽屉':'');$('kitSubtitle').textContent=m.subtitle+' · 单个完整模块';viewer?.update(m,options,colours);renderThumbnails();
- $('kitDimensions').textContent=m.width+' 宽 × '+m.nominalDepth+' 深 × '+m.height+' 高 mm';
+ $('kitDimensions').textContent='名义拼接：'+m.width+' 宽 × '+m.nominalDepth+' 深 × '+m.height+' 高 mm';renderPhysicalDimensions();
  $('kitFileCount').textContent=b.parts.length;$('kitCopyCount').textContent=b.copies;$('kitMass').textContent=mass(e.grams);$('kitTime').textContent=duration(e.seconds);
  $('roofOption').hidden=false;$('railsOption').hidden=m.kind!=='drawer';$('kitRoof').innerHTML=roofChoices(m).map(([value,title])=>`<option value="${esc(value)}">${esc(title)}</option>`).join('');$('kitRoof').value=options.roof;$('kitGrid').checked=options.grid;$('kitRails').checked=options.rails;
  $('partsCount').textContent=b.parts.length+' 种 STL · '+b.copies+' 份打印';
@@ -63,6 +64,21 @@ function renderDetail(){
  $('download3mf').disabled=busy||!local;$('download3mf').textContent=busy?'正在整理 3MF…':'↓ 下载预分色 3MF';$('downloadQuick').disabled=busy||!local;
  $('downloadHint').textContent=local?'首次生成会整理真实网格，完成后自动下载；相同配方再次下载直接读取缓存。':(selectedFiles.size?'已连接浏览器本地模型，原始 STL 可在文件清单下载；预分色 3MF 请使用本机启动服务生成。':'请通过本机启动文件打开网页以生成 3MF；也可在右上角选择原模型目录，直接读取原始 STL。');
  $('openWorkbench').href='workbench.html?kit='+encodeURIComponent(m.id);
+}
+const dimensionText=v=>v.map(n=>Number(n.toFixed(1))).join(' × ')+' mm';
+function renderPhysicalDimensions(){
+ const m=model(),record=measurements.records[m.id+'|'+selectedRoof(m,options.roof)];
+ const base=record||Object.entries(measurements.records).find(([k])=>k.startsWith(m.id+'|'))?.[1];
+ const row=(label,value,note='')=>`<div><span>${label}</span><strong>${value}</strong>${note?'<small>'+note+'</small>':''}</div>`;
+ let html=row('闭合装配外尺寸 · 估算',record?dimensionText(record.external):'该顶盖组合待校验',record?'宽 × 深 × 高 · 含当前顶盖、旋钮和锁扣':'通过本机三维载入后计算，不以名义尺寸代替');
+ if(base?.housing)html+=row('柜体 STL 外尺寸',dimensionText(base.housing),'已还原装配朝向');
+ if(base?.drawers?.length){for(const [i,box] of base.drawers.entries()){
+  const title=base.drawers.length>1?'抽屉 '+(i+1)+' ':'';
+  html+=row(title+'抽屉盒 STL 外尺寸',dimensionText(box.outer));
+  html+=row(title+'内腔参考尺寸',box.inner?dimensionText(box.inner):'该款内壁尚未测得','主内壁至主内壁 / 内底至上沿；不含可选底板');
+ }}else html+=row(m.kind==='drawer'?'抽屉内腔参考尺寸':'箱体内腔',base?.splitDrawer?'分体抽屉内腔待专项测量':'尚未校验，不从外尺寸减去固定壁厚推算');
+ html+='<p>以上均为宽 × 深 × 高。装配外尺寸按闭合预览的零件包围盒估算，随顶盖选择变化；并非量具实测。内腔不扣除局部筋位、圆角及机构，不是保证可容纳物体的尺寸。</p>';
+ $('physicalDimensions').innerHTML=html;
 }
 function renderPalette(){
  $('paletteInputs').innerHTML=palette.slots.map(s=>`<label><input type="color" data-slot="${s.id}" value="${colours[s.id]}" aria-label="${s.name}颜色"><span>${s.name}</span><small>${colours[s.id]}</small></label>`).join('');
@@ -84,6 +100,14 @@ async function downloadKit(){
 async function init(){
  try{[cat,estimates,palette,geometry,printers]=await Promise.all(['catalog.json','estimates.json','palette.json','geometry.json','printers.json'].map(async path=>{const r=await fetch(path+(path==='catalog.json'?'?revision=aligned-holes-2':''),{cache:'no-store'});if(!r.ok)throw Error(path+' 读取失败');return r.json();}));lookup=Object.fromEntries(cat.modules.map(m=>[m.id,m]));const hash=decodeURIComponent(location.hash.slice(1));if(lookup[hash])selected=hash;kind=model().kind;
   colours=readPalette();try{const r=await fetch('/api/status');if(r.ok){const status=await r.json();local=status.local&&status.ready;}}catch{}
+  try{const r=await fetch('measurements.json?revision=1',{cache:'no-store'});if(r.ok)measurements=await r.json();}catch{}
+  $('kitArt').addEventListener('assembly-measured',async event=>{
+   const detail=event.detail;
+   try{const {measureAssembly}=await import('./assembly-measurements.mjs?revision=1');
+    measurements.records[detail.model.id+'|'+detail.roof]=measureAssembly(detail.model,detail.parts);
+    if(model().id===detail.model.id)renderPhysicalDimensions();
+   }catch{}
+  });
   bindModelDirectory();
   $('kitSearch').oninput=e=>{query=e.target.value;renderList();};
   for(const [id,key] of [['kitFamily','family'],['kitFloor','floor'],['kitDepth','depth']])$(id).onchange=e=>{if(key==='family')family=e.target.value;if(key==='floor')floor=e.target.value;if(key==='depth')depth=e.target.value;renderList();};
