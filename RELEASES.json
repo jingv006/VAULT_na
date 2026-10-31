@@ -1,0 +1,38 @@
+{
+  "timezone": "Asia/Shanghai",
+  "releases": [
+    {
+      "version": "1.2",
+      "released_at": "2026-10-31T21:32:48+08:00",
+      "summary": "精简 GitHub 项目首页，补充核心功能展示与带时间戳的自动版本记录",
+      "changes": [
+        "精简 GitHub 项目首页，补充核心功能展示与带时间戳的自动版本记录"
+      ],
+      "timestamp_source": "publish-script"
+    },
+    {
+      "version": "1.1",
+      "released_at": "2026-10-31T20:20:02+08:00",
+      "summary": "抽屉隔板排布、实物尺寸校验与整合 3MF 打包",
+      "changes": [
+        "新增官方抽屉隔板互动排布与文件清单。",
+        "区分名义拼接尺寸、装配外尺寸估算与抽屉内腔参考。",
+        "组合打包支持单套整合 3MF，文件名 print-N 标注打印套数。"
+      ],
+      "commit": "ae05bcba5db7756eb768a4a57f7dfe7e1781467c",
+      "timestamp_source": "release-commit"
+    },
+    {
+      "version": "1.0",
+      "released_at": "2026-10-29T14:28:55+08:00",
+      "summary": "VAULT 工作台首个编号版本",
+      "changes": [
+        "提供尺寸总览、二维堆叠、三维装配与共享配色。",
+        "汇总耗材与时间，检查打印机尺寸，整理本地模型文件。",
+        "完善底座约束、轻量外观预览、其他品牌机型和作者支持入口。"
+      ],
+      "commit": "0a8ed7b240d4f884fc515ee5e55695a741b19bf2",
+      "timestamp_source": "release-commit"
+    }
+  ]
+}

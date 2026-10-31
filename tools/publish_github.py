@@ -4,7 +4,7 @@ import argparse
 import json
 import subprocess
 import sys
-from versioning import BASE, next_version, set_version
+from versioning import BASE, next_version, set_version, describe_changes
 
 
 def git(*args, check=True):
@@ -29,7 +29,11 @@ def publish(message=None):
     previous = git('show', 'origin/main:VERSION.json', check=False)
     published = json.loads(previous.stdout)['version'] if previous.returncode == 0 else None
     version = next_version(published)
-    set_version(version)
+    if not message and pending:
+        paths = git('diff', '--name-only', '-z', 'origin/main').stdout.split('\0')
+        paths += git('ls-files', '--others', '--exclude-standard', '-z').stdout.split('\0')
+        message = describe_changes(paths)
+    set_version(version, summary=message)
     git('add', '-A')
     if git('diff', '--cached', '--quiet', check=False).returncode:
         git('commit', '-m', f'Release V{version}' + (f': {message}' if message else ''))
