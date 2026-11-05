@@ -5,6 +5,7 @@ from pathlib import Path
 from urllib.parse import urlparse,unquote
 import argparse,json,threading,uuid,zipfile,csv,io,time,shutil,os
 import kit_service
+import divider_service
 import workbench_export
 import preview_service
 BASE=Path(__file__).resolve().parent
@@ -125,6 +126,12 @@ class Handler(SimpleHTTPRequestHandler):
     length=int(self.headers.get('Content-Length','0'))
     if not 0<length<=20000:raise ValueError('Invalid request length')
     return self.json(kit_service.public_job(kit_service.request(json.loads(self.rfile.read(length)))))
+   except (ValueError,KeyError,TypeError,json.JSONDecodeError) as e:return self.json({'error':str(e)},400)
+  if self.path=='/api/divider-3mf':
+   try:
+    length=int(self.headers.get('Content-Length','0'))
+    if not 0<length<=50000:raise ValueError('Invalid request length')
+    return self.json(kit_service.public_job(divider_service.request(json.loads(self.rfile.read(length)))))
    except (ValueError,KeyError,TypeError,json.JSONDecodeError) as e:return self.json({'error':str(e)},400)
   if self.path!='/api/export':return self.json({'error':'Not found'},404)
   try:

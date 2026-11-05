@@ -12,6 +12,24 @@ export function fits(item,items,grid){
  return true;
 }
 export function borderCount(item,grid){if(item.border==='none')return 0;const limit=item.axis==='h'?grid.w:grid.d,start=item.axis==='h'?item.x:item.y;return Number(start===0)+Number(start+item.n===limit);}
+export function snapDividerPoint(point,grid){
+ return {x:Math.max(0,Math.min(grid.w,Math.round(point.x))),y:Math.max(0,Math.min(grid.d,Math.round(point.y)))};
+}
+export function matchDividerLine(start,end,items,grid,data,{height,border='straight',id='draft'}={}){
+ if(![start?.x,start?.y,end?.x,end?.y].every(Number.isFinite))return {valid:false,reason:'请在箱内选择起点和终点'};
+ const a=snapDividerPoint(start,grid),b=snapDividerPoint(end,grid),dx=b.x-a.x,dy=b.y-a.y;
+ if(!dx&&!dy)return {valid:false,reason:'拖出一条线，或再点一个终点'};
+ const axis=Math.abs(dx)>=Math.abs(dy)?'h':'v',k=axis==='h'?'x':'y',q=axis==='h'?'y':'x',limit=axis==='h'?grid.w:grid.d;
+ const sign=b[k]>=a[k]?1:-1,available=sign>0?limit-a[k]:a[k],requested=Math.abs(b[k]-a[k]);
+ const parts=data.parts.filter(p=>p.role==='divider'&&p.height===height&&p.number<=available)
+  .sort((p,r)=>Math.abs(p.number-requested)-Math.abs(r.number-requested)||p.number-r.number);
+ if(!parts.length)return {valid:false,reason:'此方向空间不足，最短官方隔板为 5 号'};
+ const part=parts[0],item={id,axis,n:part.number,x:a.x,y:a.y,border};
+ if(sign<0)item[k]-=part.number;
+ const valid=fits(item,items,grid);
+ const reason=a[q]===0||a[q]===(axis==='h'?grid.d:grid.w)?'隔板需放在箱体内部，不能沿外壁重叠摆放':!valid?'与已有隔板重叠或交叉，请改成端点相接的 T 形分区':'';
+ return {item,part,valid,reason,requested,adjusted:requested!==part.number};
+}
 export function dividerBOM(state,data){
  const rows=new Map(),grid=gridFor(state.spec,data);
  const add=(part,qty)=>{if(!part)throw Error('官方模型不存在');const row=rows.get(part.path)||{...part,qty:0};row.qty+=qty;rows.set(part.path,row);};

@@ -196,16 +196,20 @@ def project_settings(spec):
                      'filament_multi_colour':colours, 'filament_multi_colour_type':['0']*4})
     return settings
 
-def write_project(target, spec, rows, meshes, update):
-    m=MODULES[spec['model']]; plates=arrange(rows); columns=math.ceil(math.sqrt(len(plates)))
+def write_project(target, spec, rows, meshes, update, context=None):
+    if context is None:
+        m=MODULES[spec['model']]
+        context={'code':code(m),'module':m['id'],'hardware':m['hardware']}
+    project_code=context['code']; plates=arrange(rows); columns=math.ceil(math.sqrt(len(plates)))
     slots={s['id']: i for i,s in enumerate(PALETTE['slots'])}
     meshes_by_path={row['path']:1000+i for i,row in enumerate(rows)}
     build=[]; wrappers=[]; config=['<?xml version="1.0" encoding="UTF-8"?><config>']
-    manifest={'version':VERSION,'code':code(m),'module':m['id'],'specification':spec,'parts':rows,
-              'hardware':m['hardware'],'palette':PALETTE,'plates':[],
+    manifest={'version':VERSION,'code':project_code,'module':context['module'],'specification':spec,'parts':rows,
+              'hardware':context['hardware'],'palette':PALETTE,'plates':[],
               'notes':['原始尺寸不缩放；只做平面90度旋转和位置平移。','这是未切片的模型工程，不含打印G-code。',
                        '按同色分盘；超界零件单独保留并标记，仍需在切片器调整方向或拆分。',
                        '需支撑的零件已设置开启支撑；支撑位置、打印朝向和材料槽映射请在切片器核对。']}
+    if 'layout' in context:manifest['layout']=context['layout']
     object_id=2
     for index,plate in enumerate(plates):
         px=index%columns*420;py=-(index//columns)*384
@@ -242,7 +246,7 @@ def write_project(target, spec, rows, meshes, update):
             with z.open('3D/3dmodel.model','w',force_zip64=True) as out:
                 # Bambu requires its version-formatted Application marker to load colours/config.
                 # Generator records the actual authoring tool, separately from that compatibility marker.
-                out.write(f'<?xml version="1.0" encoding="UTF-8"?><model unit="millimeter" xml:lang="zh-CN" xmlns="{CORE}" xmlns:BambuStudio="http://schemas.bambulab.com/package/2021"><metadata name="Application">BambuStudio-02.00.02.01</metadata><metadata name="Generator">VAULT Local Workbench</metadata><metadata name="BambuStudio:3mfVersion">1</metadata><metadata name="Title">{escape(code(m))} complete pre-coloured kit</metadata><resources><basematerials id="1">'.encode())
+                out.write(f'<?xml version="1.0" encoding="UTF-8"?><model unit="millimeter" xml:lang="zh-CN" xmlns="{CORE}" xmlns:BambuStudio="http://schemas.bambulab.com/package/2021"><metadata name="Application">BambuStudio-02.00.02.01</metadata><metadata name="Generator">VAULT Local Workbench</metadata><metadata name="BambuStudio:3mfVersion">1</metadata><metadata name="Title">{escape(project_code)} complete pre-coloured kit</metadata><resources><basematerials id="1">'.encode())
                 for s in PALETTE['slots']: out.write(f'<base name={quoteattr(s["name"])} displaycolor="{spec["colours"][s["id"]]}FF"/>'.encode())
                 out.write(b'</basematerials>')
                 for row in rows:
@@ -254,6 +258,7 @@ def write_project(target, spec, rows, meshes, update):
             z.writestr('Metadata/model_settings.config',''.join(config))
             z.writestr('Metadata/project_settings.config',json.dumps(project_settings(spec),ensure_ascii=False))
             z.writestr('Metadata/vault_manifest.json',json.dumps(manifest,ensure_ascii=False,indent=2))
+            if 'layout' in context:z.writestr('Metadata/隔板方案.json',json.dumps(context['layout'],ensure_ascii=False,indent=2))
             buf=io.StringIO();writer=csv.writer(buf);writer.writerow(['中文部件','原始路径','打印份数','用途','颜色','色槽','实际尺寸mm','单份耗材g','单份时间秒'])
             for row in rows:
                 estimate=ESTIMATES.get(row['path'],{})

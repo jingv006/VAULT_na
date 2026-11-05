@@ -5,7 +5,7 @@
 网站制作：**@液体香胶** · 原模型与装配说明：**VAULT / USSA DESIGN**
 
 <!-- release-status:start -->
-**当前版本：V1.2** · **更新时间：2026-10-31 21:32:48（北京时间）**
+**当前版本：V1.3** · **更新时间：2026-11-06 06:53:59（北京时间）**
 <!-- release-status:end -->
 
 [下载项目](https://github.com/jingv006/VAULT_na/archive/refs/heads/main.zip) · [完整更新记录](CHANGELOG.md) · [使用说明](docs/USAGE.md)
@@ -55,9 +55,9 @@ python3 server.py --port 8766 --open
 <!-- release-history:start -->
 | 版本 | 发布时间（北京时间） | 更新内容 |
 | --- | --- | --- |
+| V1.3 | 2026-11-06 06:53:59 | 隔板支持箱内连线自动匹配官方模型，右侧实时汇总用件，并按实际数量导出整合分色 3MF |
 | V1.2 | 2026-10-31 21:32:48 | 精简 GitHub 项目首页，补充核心功能展示与带时间戳的自动版本记录 |
 | V1.1 | 2026-10-31 20:20:02 | 抽屉隔板排布、实物尺寸校验与整合 3MF 打包 |
-| V1.0 | 2026-10-29 14:28:55 | VAULT 工作台首个编号版本 |
 
 [查看全部版本记录 →](CHANGELOG.md)
 <!-- release-history:end -->
